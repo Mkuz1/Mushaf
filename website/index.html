@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مصحف المدينة — Mus'haf · The Madinah Quran, read online & in the app</title>
+<meta name="description" content="مصحف المدينة المنورة برواية حفص — اقرأ القرآن كاملًا في المتصفح أو حمّل التطبيق. ترجمة وتفسير وبحث وعلامات، بدون إعلانات. The authentic Madinah Mushaf (Hafs, 604 pages): read online or in the app — translation, tafsir, search & bookmarks. No ads, no tracking.">
+<link rel="canonical" href="https://www.mushafapp.com/">
+<meta name="theme-color" content="#F8F3E8">
+<link rel="icon" href="assets/icon.png">
+<link rel="apple-touch-icon" href="assets/icon.png">
+<!-- Open Graph (Facebook, WhatsApp, Telegram, LinkedIn…) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mus'haf — مصحف">
+<meta property="og:title" content="مصحف المدينة — The Madinah Mushaf">
+<meta property="og:description" content="اقرأ القرآن كاملًا في المتصفح أو حمّل التطبيق — ترجمة وتفسير وبحث، بدون إعلانات. Read the full Madinah Mushaf online or in the app — translation, tafsir & search. No ads.">
+<meta property="og:url" content="https://www.mushafapp.com/">
+<meta property="og:image" content="https://www.mushafapp.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ar_AR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="fr_FR">
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="مصحف المدينة — The Madinah Mushaf">
+<meta name="twitter:description" content="Read the full Madinah Mushaf online or in the app — translation, tafsir & search. No ads, no tracking.">
+<meta name="twitter:image" content="https://www.mushafapp.com/assets/og-image.png">
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "name": "Mus'haf — مصحف المدينة",
+      "url": "https://www.mushafapp.com/",
+      "inLanguage": ["ar", "en", "fr"]
+    },
+    {
+      "@type": "MobileApplication",
+      "name": "Mus'haf — Madinah Quran",
+      "operatingSystem": "Android, Windows, macOS",
+      "applicationCategory": "ReferenceApplication",
+      "description": "The authentic Madinah Mushaf (King Fahd, Hafs, 604 pages): full-screen reading, verse-by-verse recitation by 26 reciters with repeat for memorisation, translation & tafsir, notes, ribbon bookmarks and search, offline. Android, Google TV, Windows, macOS and the web. Free, no ads, no tracking.",
+      "url": "https://www.mushafapp.com/",
+      "installUrl": "https://play.google.com/store/apps/details?id=com.mushaf.myapp",
+      "sameAs": "https://play.google.com/store/apps/details?id=com.mushaf.myapp",
+      "image": "https://www.mushafapp.com/assets/icon.png",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    {
+      "@type": "WebApplication",
+      "name": "Mus'haf Web Reader",
+      "url": "https://www.mushafapp.com/reader.html",
+      "applicationCategory": "ReferenceApplication",
+      "browserRequirements": "Requires JavaScript",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    }
+  ]
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F8F3E8; --cream2:#EFE6D2; --ink:#2A1E12; --gold:#C5A059; --gold-d:#8C6B30;
+    --green:#0E3D31; --green2:#14513F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--ink);
+    background:radial-gradient(circle at 50% 0,#FCF8EE,#EFE6D2);min-height:100vh}
+  body[dir="rtl"]{font-family:'Amiri','Inter',serif}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 22px}
+  a{color:inherit}
+  /* nav */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;max-width:1040px;margin:0 auto;gap:12px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:700}
+  .brand img{width:44px;height:44px;border-radius:12px}
+  .brand b{font-size:22px}
+  .navlinks{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .btn{border:1.5px solid var(--gold);color:var(--gold-d);background:rgba(197,160,89,.10);
+    border-radius:30px;padding:8px 18px;font-weight:600;cursor:pointer;font-size:15px;text-decoration:none;display:inline-block}
+  .btn.solid{background:var(--green);color:#F1E7CC;border-color:var(--green)}
+  /* language segmented control */
+  .lang{display:inline-flex;border:1.5px solid var(--gold);border-radius:30px;overflow:hidden}
+  .lang button{border:0;background:transparent;color:var(--gold-d);font-weight:600;font-size:14px;
+    padding:7px 13px;cursor:pointer;font-family:inherit}
+  .lang button.active{background:var(--green);color:#F1E7CC}
+  /* emerald band with the eight-pointed star pattern (as on the apps' opening page) */
+  .band{background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cg fill='none' stroke='%23DBB86B' stroke-opacity='.13'%3E%3Crect x='17' y='17' width='30' height='30' transform='rotate(45 32 32)'/%3E%3Crect x='17' y='17' width='30' height='30'/%3E%3C/g%3E%3C/svg%3E"),
+      linear-gradient(180deg,#083326,#031C14);color:#F3EAD3}
+  .band .btn{color:#F1DFA6;border-color:rgba(219,184,107,.7);background:rgba(219,184,107,.10)}
+  .band .btn.solid{background:#DBB86B;color:#031C14;border-color:#DBB86B}
+  .band .lang{border-color:rgba(219,184,107,.7)}
+  .band .lang button{color:#F1DFA6}
+  .band .lang button.active{background:#DBB86B;color:#031C14}
+  .band .hero p.lead{color:rgba(243,234,211,.82)}
+  .band .brand b{color:#F1DFA6}
+  .new{display:inline-block;background:#DBB86B;color:#031C14;font-weight:700;font-size:13px;border-radius:20px;padding:4px 12px;margin-bottom:14px;font-family:'Inter',sans-serif}
+  .card.hl{background:linear-gradient(180deg,rgba(13,120,92,.10),rgba(255,255,255,.55));border-color:rgba(13,120,92,.35)}
+  .card.hl h3{color:#0D5C46}
+  /* downloads */
+  .downloads{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:10px 0 34px}
+  .dl{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;text-decoration:none;
+    background:rgba(255,255,255,.6);border:1px solid rgba(197,160,89,.4);border-radius:16px;padding:18px 10px;color:var(--ink)}
+  .dl:hover{border-color:var(--gold)}
+  .dl .ic{font-size:30px}
+  .dl b{font-size:16px}
+  .dl small{font-size:13px;color:#5b4a31}
+  @media(max-width:900px){.downloads{grid-template-columns:repeat(2,1fr)}}
+  /* hero */
+  .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:36px 0 28px}
+  .hero h1{font-size:52px;line-height:1.18;margin-bottom:18px}
+  .hero h1 span{display:inline-block}
+  body[dir="rtl"] .hero h1{line-height:1.5}
+  body[dir="rtl"] .gold{padding-bottom:.08em}
+  .gold{background:linear-gradient(180deg,#E9CD86,#C5A059 55%,#8C6B30);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p.lead{font-size:20px;color:#5b4a31;margin-bottom:24px;line-height:1.7}
+  .hero .cta{display:flex;gap:12px;flex-wrap:wrap}
+  .phone{justify-self:center;width:270px;max-width:80%;border-radius:30px;
+    box-shadow:0 30px 60px -20px rgba(60,40,10,.45);border:6px solid #15110b}
+  /* features */
+  .features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:28px 0}
+  .card{background:rgba(255,255,255,.55);border:1px solid rgba(197,160,89,.35);border-radius:16px;padding:20px}
+  .card h3{font-size:17px;margin-bottom:6px;color:var(--gold-d)}
+  .card p{font-size:15px;color:#5b4a31;line-height:1.6}
+  /* shots */
+  .shots{padding:20px 0 40px}
+  .shots h2{text-align:center;font-size:30px;margin-bottom:22px}
+  .strip{display:flex;gap:16px;overflow-x:auto;overflow-y:hidden;padding:6px 2px 16px;
+    direction:ltr;scroll-snap-type:x proximity;scroll-behavior:smooth;
+    cursor:grab;-webkit-overflow-scrolling:touch}
+  .strip:active{cursor:grabbing}
+  .strip::-webkit-scrollbar{height:8px}
+  .strip::-webkit-scrollbar-thumb{background:rgba(197,160,89,.55);border-radius:8px}
+  .strip::-webkit-scrollbar-track{background:rgba(197,160,89,.12);border-radius:8px}
+  .strip figure{flex:none;margin:0;text-align:center;scroll-snap-align:center;width:min-content}
+  .strip figcaption{font-size:14px;color:#5b4a31;margin-top:10px;line-height:1.45}
+  .strip img{height:480px;width:auto;border-radius:18px;border:1px solid rgba(197,160,89,.4);
+    box-shadow:0 16px 36px -16px rgba(60,40,10,.4);scroll-snap-align:center;background:#EFE6D2;
+    user-select:none;-webkit-user-drag:none;pointer-events:none}
+  /* contact */
+  .contact{padding:18px 0 48px;max-width:620px;margin:0 auto}
+  .contact h2{text-align:center;font-size:30px;margin-bottom:6px}
+  .contact p.sub{text-align:center;color:#5b4a31;margin-bottom:22px;font-size:17px}
+  .contact form{display:flex;flex-direction:column;gap:14px}
+  .contact input,.contact textarea{width:100%;border:1.5px solid rgba(197,160,89,.5);border-radius:12px;
+    padding:13px 15px;font-size:16px;font-family:'Inter',sans-serif;background:rgba(255,255,255,.7);color:var(--ink)}
+  .contact textarea{min-height:130px;resize:vertical}
+  .contact input:focus,.contact textarea:focus{outline:none;border-color:var(--gold)}
+  .contact .send{align-self:center;border:0;background:var(--green);color:#F1E7CC;border-radius:30px;
+    padding:12px 40px;font-weight:700;font-size:16px;cursor:pointer;font-family:inherit}
+  .contact .direct{text-align:center;color:#5b4a31;font-size:14px;margin-top:6px}
+  .contact .direct a{color:var(--gold-d);font-weight:600;text-decoration:none}
+  .formnote{text-align:center;font-size:15px;font-weight:600;min-height:22px}
+  .formnote.ok{color:var(--green)}
+  .formnote.err{color:#9a3b2f}
+  /* footer */
+  footer{background:var(--green);color:#E8DCC0;margin-top:20px}
+  .foot{max-width:1040px;margin:0 auto;padding:26px 22px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .foot a{color:#E9CD86;text-decoration:none;font-weight:600}
+  .ded{font-size:14px;opacity:.85;max-width:560px;line-height:1.7}
+  h2.section{text-align:center;font-size:30px;margin:8px 0 4px}
+  @media(max-width:760px){
+    .hero{grid-template-columns:1fr;text-align:center}
+    .hero h1{font-size:40px}.features{grid-template-columns:1fr}
+    .hero .cta{justify-content:center}.phone{order:-1}
+  }
+</style>
+</head>
+<body dir="rtl">
+<div class="band">
+<nav>
+  <div class="brand"><img src="assets/icon.png" alt="Mus'haf"><b>مصحف</b></div>
+  <div class="navlinks">
+    <a class="btn solid" href="reader.html" data-ar="اقرأ الآن" data-en="Read now" data-fr="Lire">اقرأ الآن</a>
+    <a class="btn" href="#contact" data-ar="تواصل معنا" data-en="Contact" data-fr="Contact">تواصل معنا</a>
+    <a class="btn" href="privacy.html" data-ar="سياسة الخصوصية" data-en="Privacy" data-fr="Confidentialité">سياسة الخصوصية</a>
+    <div class="lang" id="lang">
+      <button data-lang="ar">ع</button>
+      <button data-lang="en">EN</button>
+      <button data-lang="fr">FR</button>
+    </div>
+  </div>
+</nav>
+<div class="wrap">
+  <section class="hero">
+    <div>
+      <h1><span class="gold" data-ar="مصحف المدينة" data-en="The Madinah Mushaf" data-fr="Le Mushaf de Médine">مصحف المدينة</span><br>
+        <span data-ar="بتصميمٍ أنيقٍ وبسيط" data-en="beautifully simple" data-fr="d'une élégante simplicité">بتصميمٍ أنيقٍ وبسيط</span></h1>
+<span class="new" data-ar="جديد: تذكير الجمعة بسورة الكهف · ألوان المواضيع · Android TV بجهاز التحكم" data-en="New: Friday Al-Kahf reminder · colours by subject · Android TV with the remote" data-fr="Nouveau : rappel Al-Kahf du vendredi · couleurs par thème · Android TV à la télécommande">جديد: تذكير الجمعة بسورة الكهف · ألوان المواضيع · Android TV بجهاز التحكم</span>
+      <p class="lead"
+         data-ar="مصحف المدينة المنورة برواية حفص — ٦٠٤ صفحات أصلية، مع تلاوة آية بآية بأصوات ٢٦ قارئًا، وترجمة وتفسير وملاحظات وعلامات وبحث. على Android وGoogle TV والآيفون والآيباد وWindows وmacOS والمتصفح."
+         data-en="The Madinah Mushaf (Hafs) — all 604 authentic pages, with verse-by-verse recitation by 26 reciters, translation, tafsir, notes, bookmarks and search. On Android, Google TV, iPhone, iPad, Windows, macOS and the web."
+         data-fr="Le Mushaf de Médine (Hafs) — les 604 pages authentiques, avec récitation verset par verset par 26 récitateurs, traduction, tafsir, notes, signets et recherche. Sur Android, Google TV, iPhone, iPad, Windows, macOS et le web.">
+        مصحف المدينة المنورة برواية حفص — ٦٠٤ صفحات أصلية، مع تلاوة آية بآية بأصوات ٢٦ قارئًا، وترجمة وتفسير وملاحظات وعلامات وبحث. على Android وGoogle TV والآيفون والآيباد وWindows وmacOS والمتصفح.</p>
+      <div class="cta">
+        <a class="btn solid" href="https://play.google.com/store/apps/details?id=com.mushaf.myapp" target="_blank" rel="noopener" data-ar="حمّله من Google Play ▶" data-en="Get it on Google Play ▶" data-fr="Télécharger sur Google Play ▶">حمّله من Google Play ▶</a>
+        <a class="btn solid" href="reader.html" data-ar="اقرأ الآن في المتصفح" data-en="Read now in your browser" data-fr="Lire dans le navigateur">اقرأ الآن في المتصفح</a>
+        <a class="btn" href="iphone.html" data-ar="للآيفون والآيباد" data-en="iPhone &amp; iPad" data-fr="iPhone et iPad">للآيفون والآيباد</a>
+        <a class="btn" href="#download" data-ar="Windows · macOS · APK" data-en="Windows · macOS · APK" data-fr="Windows · macOS · APK">Windows · macOS · APK</a>
+      </div>
+    </div>
+    <img class="phone" data-shot="2-coloured" src="assets/app/ar/2-coloured.jpg" alt="Mus'haf">
+  </section>
+</div>
+</div>
+<div class="wrap">
+  <h2 class="section" data-ar="الجديد" data-en="What's new" data-fr="Nouveautés">الجديد</h2>
+  <section class="features">
+    <div class="card hl"><h3 data-ar="تذكير الجمعة: سورة الكهف" data-en="Friday reminder: Al-Kahf" data-fr="Rappel du vendredi : Al-Kahf">تذكير الجمعة: سورة الكهف</h3>
+      <p data-ar="كل جمعة يذكّرك التطبيق بقراءة سورة الكهف، حتى وهو مغلق، ويفتحها لك بلمسة. اختر الوقت أو أوقفه من الإعدادات." data-en="Every Friday the app reminds you to read Surat Al-Kahf, even when it is closed, and opens it with one tap. Choose the time, or turn it off, in Settings." data-fr="Chaque vendredi, l'application vous rappelle de lire la sourate Al-Kahf, même fermée, et l'ouvre d'un geste. Choisissez l'heure ou désactivez-le dans les Réglages.">كل جمعة يذكّرك التطبيق بقراءة سورة الكهف، حتى وهو مغلق، ويفتحها لك بلمسة. اختر الوقت أو أوقفه من الإعدادات.</p></div>
+    <div class="card hl"><h3 data-ar="ألوان المواضيع" data-en="Colours by subject" data-fr="Couleurs par thème">ألوان المواضيع</h3>
+      <p data-ar="زر واحد يلوّن كل مقطع من المصحف بلون خاص حسب موضوعه أو قصته (أقسام الركوع الـ٥٥٦)، مع بيان السورة والآيات لكل لون." data-en="One button colours each passage of the mushaf by its subject or story (the 556 ruku' sections), with the surah and ayahs of each colour shown above the page." data-fr="Un bouton colore chaque passage du mushaf selon son thème ou son récit (les 556 sections de ruku'), avec la sourate et les versets de chaque couleur.">زر واحد يلوّن كل مقطع من المصحف بلون خاص حسب موضوعه أو قصته (أقسام الركوع الـ٥٥٦)، مع بيان السورة والآيات لكل لون.</p></div>
+    <div class="card hl"><h3 data-ar="Android TV بجهاز التحكم" data-en="Android TV with the remote" data-fr="Android TV à la télécommande">Android TV بجهاز التحكم</h3>
+      <p data-ar="كل التطبيق بجهاز التحكم: اختر الآية بزر OK وتنقّل بين الآيات، واقرأ التفسير والترجمة، والقائمة الجانبية والإعدادات وإشعار التحديث، والزر المحدَّد واضح من بعيد." data-en="The whole app with the remote: OK selects an ayah and the arrows move between ayahs; read the tafsir and translation, use the side menu, Settings and the update notice. The focused button shows clearly across the room." data-fr="Toute l'application à la télécommande : OK choisit un verset et les flèches passent d'un verset à l'autre ; tafsir et traduction, menu latéral, réglages et avis de mise à jour. Le bouton actif se voit de loin.">كل التطبيق بجهاز التحكم: اختر الآية بزر OK وتنقّل بين الآيات، واقرأ التفسير والترجمة، والقائمة الجانبية والإعدادات وإشعار التحديث، والزر المحدَّد واضح من بعيد.</p></div>
+    <div class="card hl"><h3 data-ar="عرض الترجمة والتفسير" data-en="Translation &amp; Tafsir view" data-fr="Vue Traduction et tafsir">عرض الترجمة والتفسير</h3>
+      <p data-ar="السورة آية بعد آية مع معناها: العربية أو الترجمة أو كلاهما، والتفسير تحت كل آية، والآية المتلوّة تتبعها القائمة." data-en="The surah ayah by ayah with its meaning: Arabic, translation or both, the tafsir under each ayah, and the list follows the recitation." data-fr="La sourate verset par verset avec son sens : arabe, traduction ou les deux, le tafsir sous chaque verset, et la liste suit la récitation.">السورة آية بعد آية مع معناها: العربية أو الترجمة أو كلاهما، والتفسير تحت كل آية، والآية المتلوّة تتبعها القائمة.</p></div>
+    <div class="card hl"><h3 data-ar="صفحات أكبر، ومظهر واحد" data-en="Bigger pages, one look" data-fr="Pages plus grandes, un seul style">صفحات أكبر، ومظهر واحد</h3>
+      <p data-ar="على الأجهزة اللوحية والشاشات الكبيرة تملأ الصفحات الارتفاع كله، وعلى الأجهزة القابلة للطي صفحة على كل نصف. والقوائم والأشرطة بالأخضر الداكن نفسه على كل الأجهزة." data-en="On tablets and large screens the pages use the full height, and on foldables there is a page on each half. Menus and bars share the same dark green on every device." data-fr="Sur tablettes et grands écrans, les pages occupent toute la hauteur ; sur les pliables, une page par moitié. Menus et barres du même vert foncé sur tous les appareils.">على الأجهزة اللوحية والشاشات الكبيرة تملأ الصفحات الارتفاع كله، وعلى الأجهزة القابلة للطي صفحة على كل نصف. والقوائم والأشرطة بالأخضر الداكن نفسه على كل الأجهزة.</p></div>
+    <div class="card hl"><h3 data-ar="صلاح بو خاطر ★" data-en="Salah Bukhatir ★" data-fr="Salah Bukhatir ★">صلاح بو خاطر ★</h3>
+      <p data-ar="القارئ الافتراضي الآن في كل التطبيقات، ومميّز بنجمة في قائمة القرّاء. ويبقى القارئ الذي اخترته كما هو." data-en="Now the default reciter in every app, marked with a star in the list. A reciter you already chose stays selected." data-fr="Désormais le récitateur par défaut dans toutes les applications, marqué d'une étoile. Le récitateur que vous avez choisi reste sélectionné.">القارئ الافتراضي الآن في كل التطبيقات، ومميّز بنجمة في قائمة القرّاء. ويبقى القارئ الذي اخترته كما هو.</p></div>
+    <div class="card hl"><h3 data-ar="حمّل المصحف من الإعدادات" data-en="Downloads in Settings" data-fr="Téléchargements dans les Réglages">حمّل المصحف من الإعدادات</h3>
+      <p data-ar="روابط لأحدث نسخة لأندرويد وويندوز وماك وGoogle Play والقارئ على الويب، من داخل كل تطبيق." data-en="Links to the newest Android, Windows and macOS builds, Google Play and the web reader, from inside every app." data-fr="Des liens vers les dernières versions Android, Windows et macOS, Google Play et le lecteur web, depuis chaque application.">روابط لأحدث نسخة لأندرويد وويندوز وماك وGoogle Play والقارئ على الويب، من داخل كل تطبيق.</p></div>
+    <div class="card hl"><h3 data-ar="قراءة بملء الشاشة" data-en="Full-screen reading" data-fr="Lecture plein écran">قراءة بملء الشاشة</h3>
+      <p data-ar="الصفحة وحدها تملأ الشاشة، بلا أشرطة. اضغط الصفحة لإظهار الأزرار فوقها، فتختفي وحدها بعد ثوانٍ وتستمر التلاوة." data-en="The page alone fills the screen. Tap it to show the controls over the page; they hide again by themselves while the recitation carries on." data-fr="La page seule remplit l'écran. Touchez-la pour afficher les commandes ; elles se masquent seules et la récitation continue.">الصفحة وحدها تملأ الشاشة، بلا أشرطة. اضغط الصفحة لإظهار الأزرار فوقها، فتختفي وحدها بعد ثوانٍ وتستمر التلاوة.</p></div>
+    <div class="card hl"><h3 data-ar="تابع من حيث توقفت" data-en="Continue where you stopped" data-fr="Reprenez où vous vous êtes arrêté">تابع من حيث توقفت</h3>
+      <p data-ar="تعرض صفحة البداية «متابعة القراءة» بالسورة والصفحة والآية، أو «متابعة الاستماع» إن كنت تستمع." data-en="The opening page offers Continue Reading (with the surah, page and ayah), or Continue Listening if you were listening." data-fr="La page d'accueil propose Reprendre la lecture (sourate, page et verset) ou Reprendre l'écoute.">تعرض صفحة البداية «متابعة القراءة» بالسورة والصفحة والآية، أو «متابعة الاستماع» إن كنت تستمع.</p></div>
+    <div class="card hl"><h3 data-ar="٢٦ قارئًا، آية بآية" data-en="26 reciters, verse by verse" data-fr="26 récitateurs, verset par verset">٢٦ قارئًا، آية بآية</h3>
+      <p data-ar="عبد الباسط، الحصري، المنشاوي، العفاسي، السديس، الشريم، المعيقلي، الغامدي، بو خاطر وغيرهم — والآية المتلوّة مظلّلة والصفحة تتبعها." data-en="Abdul Basit, Al-Husary, Al-Minshawi, Alafasy, As-Sudais, Ash-Shuraim, Al-Muaiqly, Al-Ghamdi, Bukhatir and more — the ayah being recited is highlighted and the page follows it." data-fr="Abdul Basit, Al-Husary, Al-Minshawi, Alafasy, As-Sudais, Ash-Shuraim, Al-Muaiqly, Al-Ghamdi, Bukhatir et d'autres — le verset récité est surligné et la page le suit.">عبد الباسط، الحصري، المنشاوي، العفاسي، السديس، الشريم، المعيقلي، الغامدي، بو خاطر وغيرهم — والآية المتلوّة مظلّلة والصفحة تتبعها.</p></div>
+    <div class="card hl"><h3 data-ar="للحفظ" data-en="For memorisation" data-fr="Pour la mémorisation">للحفظ</h3>
+      <p data-ar="في التطبيقات: كرّر كل آية أو نطاقًا كاملًا حتى ∞، واختر نقطة التوقف، وحدّد بداية النطاق ونهايته من أي آية." data-en="In the apps: repeat each ayah or a whole range up to ∞, pick where to stop, and set a range's start and end from any ayah." data-fr="Dans les applications : répétez chaque verset ou une plage jusqu'à ∞, choisissez où s'arrêter et définissez début et fin depuis n'importe quel verset.">في التطبيقات: كرّر كل آية أو نطاقًا كاملًا حتى ∞، واختر نقطة التوقف، وحدّد بداية النطاق ونهايته من أي آية.</p></div>
+    <div class="card hl"><h3 data-ar="المصحف الملوّن" data-en="The coloured mushaf" data-fr="Le mushaf en couleur">المصحف الملوّن</h3>
+      <p data-ar="صفحات على رقّ بإطار ذهبي وأخضر، ولفظ الجلالة بالأحمر في التطبيقات. ومعه الكلاسيكي والليلي، وضبط السطوع." data-en="Parchment pages in a gold-and-green frame, with every name of Allah in red in the apps. Plus Classic and Night, and a brightness control." data-fr="Des pages sur parchemin dans un cadre or et vert, le nom d'Allah en rouge dans les applications. Plus Classique et Nuit, et la luminosité.">صفحات على رقّ بإطار ذهبي وأخضر، ولفظ الجلالة بالأحمر في التطبيقات. ومعه الكلاسيكي والليلي، وضبط السطوع.</p></div>
+    <div class="card hl"><h3 data-ar="شريط العلامة والملاحظات" data-en="Ribbon bookmarks &amp; notes" data-fr="Signets ruban et notes">شريط العلامة والملاحظات</h3>
+      <p data-ar="انقر الشريط الحريري أعلى الصفحة لوضع علامة. وفي التطبيقات: اكتب ملاحظة على أي آية، وصدّر ملاحظاتك وعلاماتك أو أرسلها بالبريد." data-en="Tap the silk ribbon at the top of a page to bookmark it. In the apps, add a note to any ayah, and export or email your notes and bookmarks." data-fr="Touchez le ruban en haut d'une page pour la marquer. Dans les applications, ajoutez une note à un verset et exportez ou envoyez vos notes et signets.">انقر الشريط الحريري أعلى الصفحة لوضع علامة. وفي التطبيقات: اكتب ملاحظة على أي آية، وصدّر ملاحظاتك وعلاماتك أو أرسلها بالبريد.</p></div>
+    <div class="card hl"><h3 data-ar="على كل أجهزتك" data-en="On all your devices" data-fr="Sur tous vos appareils">على كل أجهزتك</h3>
+      <p data-ar="Android على الهواتف والأجهزة اللوحية والقابلة للطي وGoogle TV، والآيفون والآيباد، وWindows وmacOS، والمتصفح." data-en="Android phones, tablets, foldables and Google TV, iPhone and iPad, Windows, macOS and the web." data-fr="Android (téléphones, tablettes, pliables, Google TV), iPhone et iPad, Windows, macOS et le web.">Android على الهواتف والأجهزة اللوحية والقابلة للطي وGoogle TV، والآيفون والآيباد، وWindows وmacOS، والمتصفح.</p></div>
+    <div class="card hl"><h3 data-ar="تحديثات تلقائية" data-en="Automatic updates" data-fr="Mises à jour automatiques">تحديثات تلقائية</h3>
+      <p data-ar="يخبرك التطبيق بكل إصدار جديد ويحمّله لك، من Google Play أو مباشرة." data-en="The app tells you about each new version and fetches it for you, through Google Play or directly." data-fr="L'application vous signale chaque nouvelle version et la télécharge, via Google Play ou directement.">يخبرك التطبيق بكل إصدار جديد ويحمّله لك، من Google Play أو مباشرة.</p></div>
+    <div class="card hl"><h3 data-ar="الفهرس الكامل" data-en="The full index" data-fr="L'index complet">الفهرس الكامل</h3>
+      <p data-ar="في التطبيقات: السور، والأجزاء بأرباع الأحزاب الـ٢٤٠ وبداياتها، والبحث، والعلامات، والملاحظات — في قائمة جانبية واحدة." data-en="In the apps: surahs, the juz' with all 240 hizb quarters and their opening words, search, bookmarks and notes — in one side menu." data-fr="Dans les applications : sourates, juz' avec les 240 quarts de hizb et leurs premiers mots, recherche, signets et notes — dans un seul menu.">في التطبيقات: السور، والأجزاء بأرباع الأحزاب الـ٢٤٠ وبداياتها، والبحث، والعلامات، والملاحظات — في قائمة جانبية واحدة.</p></div>
+  </section>
+  <h2 class="section" data-ar="وأيضًا" data-en="And also" data-fr="Et aussi">وأيضًا</h2>
+  <section class="features">
+    <div class="card"><h3 data-ar="ترجمة وتفسير لكل آية" data-en="Translation &amp; Tafsir per ayah" data-fr="Traduction et tafsir par verset">ترجمة وتفسير لكل آية</h3>
+      <p data-ar="صحيح إنترناشونال وبكثال وحميد الله، والجلالين والميسّر وابن كثير والمختصر." data-en="Saheeh International, Pickthall and Hamidullah; Al-Jalalayn, Al-Muyassar, Ibn Kathir and Al-Mukhtasar." data-fr="Saheeh International, Pickthall et Hamidullah ; Al-Jalalayn, Al-Muyassar, Ibn Kathir et Al-Mukhtasar.">صحيح إنترناشونال وبكثال وحميد الله، والجلالين والميسّر وابن كثير والمختصر.</p></div>
+    <div class="card"><h3 data-ar="مشاركة الآية كصورة" data-en="Share an ayah as an image" data-fr="Partager un verset en image">مشاركة الآية كصورة</h3>
+      <p data-ar="بطاقة بالرسم العثماني الكامل وتشكيله، مع الترجمة إن شئت." data-en="A card with the full Uthmani text and tashkeel, with the translation if you like." data-fr="Une carte avec le texte uthmani complet et son tashkil, avec la traduction si vous voulez.">بطاقة بالرسم العثماني الكامل وتشكيله، مع الترجمة إن شئت.</p></div>
+    <div class="card"><h3 data-ar="يعمل دون إنترنت" data-en="Works offline" data-fr="Fonctionne hors ligne">يعمل دون إنترنت</h3>
+      <p data-ar="نزّل الصفحات الـ٦٠٤ مرة واحدة. واجهة بالعربية والإنجليزية والفرنسية." data-en="Download all 604 pages once. Arabic, English and French interface." data-fr="Téléchargez les 604 pages une fois. Interface en arabe, anglais et français.">نزّل الصفحات الـ٦٠٤ مرة واحدة. واجهة بالعربية والإنجليزية والفرنسية.</p></div>
+    <div class="card"><h3 data-ar="صفحتان متقابلتان" data-en="Two-page spreads" data-fr="Double page">صفحتان متقابلتان</h3>
+      <p data-ar="على الأجهزة اللوحية والشاشات العريضة، وعلى الهواتف القابلة للطي حول المفصل." data-en="On tablets and wide screens, and across the hinge on foldable phones." data-fr="Sur tablettes et grands écrans, et de part et d'autre de la charnière des pliables.">على الأجهزة اللوحية والشاشات العريضة، وعلى الهواتف القابلة للطي حول المفصل.</p></div>
+    <div class="card"><h3 data-ar="البحث في الآيات" data-en="Ayah search" data-fr="Recherche de versets">البحث في الآيات</h3>
+      <p data-ar="ابحث في نص القرآن بالتشكيل أو بدونه." data-en="Search the Quran's text with or without diacritics." data-fr="Cherchez dans le texte du Coran avec ou sans voyelles.">ابحث في نص القرآن بالتشكيل أو بدونه.</p></div>
+    <div class="card"><h3 data-ar="صدقة جارية" data-en="A Sadaqah Jariyah" data-fr="Une Sadaqah Jariyah">صدقة جارية</h3>
+      <p data-ar="بدون إعلانات ولا حسابات ولا تتبّع." data-en="No ads, no accounts, no tracking." data-fr="Sans publicité, sans compte, sans suivi.">بدون إعلانات ولا حسابات ولا تتبّع.</p></div>
+  </section>
+  <h2 class="section" id="download" data-ar="حمّل المصحف" data-en="Get Mus'haf" data-fr="Obtenir Mus'haf">حمّل المصحف</h2>
+  <section class="downloads">
+    <a class="dl" href="https://play.google.com/store/apps/details?id=com.mushaf.myapp" target="_blank" rel="noopener"><span class="ic">▶</span><b>Google Play</b><small data-ar="Android وGoogle TV" data-en="Android &amp; Google TV" data-fr="Android et Google TV">Android وGoogle TV</small></a>
+    <a class="dl" href="https://github.com/Mkuz1/Mushaf-releases/releases/latest/download/Mushaf-Android.apk" rel="noopener"><span class="ic">🤖</span><b>Android APK</b><small data-ar="تثبيت مباشر" data-en="Direct install" data-fr="Installation directe">تثبيت مباشر</small></a>
+    <a class="dl" href="https://github.com/Mkuz1/Mushaf-releases/releases/latest/download/Mushaf-Windows-Setup.exe" rel="noopener"><span class="ic">🪟</span><b>Windows</b><small data-ar="Windows 10 و 11" data-en="Windows 10 &amp; 11" data-fr="Windows 10 et 11">Windows 10 و 11</small></a>
+    <a class="dl" href="https://github.com/Mkuz1/Mushaf-releases/releases/latest/download/Mushaf-macOS.dmg" rel="noopener"><span class="ic">💻</span><b>macOS</b><small data-ar="macOS 26 أو أحدث" data-en="macOS 26 or later" data-fr="macOS 26 ou plus récent">macOS 26 أو أحدث</small></a>
+    <a class="dl" href="iphone.html"><span class="ic">📱</span><b data-ar="آيفون وآيباد" data-en="iPhone &amp; iPad" data-fr="iPhone et iPad">آيفون وآيباد</b><small data-ar="بحساب Apple المجاني" data-en="With a free Apple ID" data-fr="Avec un identifiant Apple gratuit">بحساب Apple المجاني</small></a>
+    <a class="dl" href="reader.html"><span class="ic">🌐</span><b data-ar="المتصفح" data-en="Web" data-fr="Web">المتصفح</b><small data-ar="بدون تثبيت" data-en="No install" data-fr="Sans installation">بدون تثبيت</small></a>
+  </section>
+  <section class="shots">
+    <h2 data-ar="لمحات من التطبيق" data-en="A look inside" data-fr="Aperçu de l'application">لمحات من التطبيق</h2>
+    <div class="strip">
+      <figure><img data-shot="1-opening" src="assets/app/ar/1-opening.jpg" alt="The opening page: continue where you stopped" width="720" height="1439" loading="lazy"><figcaption data-ar="صفحة البداية: تابع من حيث توقفت" data-en="The opening page: continue where you stopped" data-fr="La page d'ouverture : reprenez où vous vous êtes arrêté">صفحة البداية: تابع من حيث توقفت</figcaption></figure>
+      <figure><img data-shot="2-coloured" src="assets/app/ar/2-coloured.jpg" alt="The coloured mushaf with the ribbon bookmark" width="720" height="1439" loading="lazy"><figcaption data-ar="المصحف الملوّن مع شريط العلامة" data-en="The coloured mushaf with the ribbon bookmark" data-fr="Le mushaf en couleur avec le signet ruban">المصحف الملوّن مع شريط العلامة</figcaption></figure>
+      <figure><img data-shot="3-recitation" src="assets/app/ar/3-recitation.jpg" alt="Verse-by-verse recitation, the ayah highlighted" width="720" height="1439" loading="lazy"><figcaption data-ar="تلاوة آية بآية والآية مظلّلة" data-en="Verse-by-verse recitation, the ayah highlighted" data-fr="Récitation verset par verset, le verset surligné">تلاوة آية بآية والآية مظلّلة</figcaption></figure>
+      <figure><img data-shot="4-reciters" src="assets/app/ar/4-reciters.jpg" alt="Salah Bukhatir ★ by default, with repeat for memorisation" width="720" height="1439" loading="lazy"><figcaption data-ar="صلاح بو خاطر ★ قارئًا افتراضيًا، والتكرار للحفظ" data-en="Salah Bukhatir ★ by default, with repeat for memorisation" data-fr="Salah Bukhatir ★ par défaut, avec répétition pour mémoriser">صلاح بو خاطر ★ قارئًا افتراضيًا، والتكرار للحفظ</figcaption></figure>
+      <figure><img data-shot="5-index" src="assets/app/ar/5-index.jpg" alt="The index: surahs, juz, search, bookmarks, notes" width="720" height="1439" loading="lazy"><figcaption data-ar="الفهرس: السور والأجزاء والبحث والعلامات والملاحظات" data-en="The index: surahs, juz, search, bookmarks, notes" data-fr="L'index : sourates, juz, recherche, signets, notes">الفهرس: السور والأجزاء والبحث والعلامات والملاحظات</figcaption></figure>
+      <figure><img data-shot="6-downloads" src="assets/app/ar/6-downloads.jpg" alt="Get Mus'haf for all your devices from Settings" width="720" height="1439" loading="lazy"><figcaption data-ar="حمّل المصحف لكل أجهزتك من الإعدادات" data-en="Get Mus'haf for all your devices from Settings" data-fr="Obtenez Mus'haf pour tous vos appareils depuis les Réglages">حمّل المصحف لكل أجهزتك من الإعدادات</figcaption></figure>
+      <figure><img data-shot="7-fullscreen" src="assets/app/ar/7-fullscreen.jpg" alt="Full screen: tap the page for the controls" width="720" height="1439" loading="lazy"><figcaption data-ar="ملء الشاشة: اضغط الصفحة لإظهار الأزرار" data-en="Full screen: tap the page for the controls" data-fr="Plein écran : touchez la page pour les commandes">ملء الشاشة: اضغط الصفحة لإظهار الأزرار</figcaption></figure>
+      <figure><img data-shot="8-night" src="assets/app/ar/8-night.jpg" alt="Night pages" width="720" height="1439" loading="lazy"><figcaption data-ar="الوضع الليلي" data-en="Night pages" data-fr="Pages de nuit">الوضع الليلي</figcaption></figure>
+      <figure><img src="assets/shot-share.png" alt="Ayah share card" loading="lazy"><figcaption data-ar="مشاركة الآية كصورة" data-en="Share an ayah as an image" data-fr="Partager un verset en image">مشاركة الآية كصورة</figcaption></figure>
+    </div>
+  </section>
+  <section class="contact" id="contact">
+    <h2 data-ar="تواصل معنا" data-en="Contact us" data-fr="Nous contacter">تواصل معنا</h2>
+    <p class="sub" data-ar="هل لديك سؤال أو اقتراح؟ راسلنا." data-en="Have a question or suggestion? Send us a message." data-fr="Une question ou une suggestion ? Écrivez-nous.">هل لديك سؤال أو اقتراح؟ راسلنا.</p>
+    <form id="contactForm">
+      <input type="text" id="cName" name="name" required
+        data-ph-ar="الاسم" data-ph-en="Name" data-ph-fr="Nom" placeholder="الاسم">
+      <input type="email" id="cEmail" name="email" required
+        data-ph-ar="بريدك الإلكتروني" data-ph-en="Your email" data-ph-fr="Votre e-mail" placeholder="بريدك الإلكتروني">
+      <textarea id="cMsg" name="message" required
+        data-ph-ar="رسالتك" data-ph-en="Your message" data-ph-fr="Votre message" placeholder="رسالتك"></textarea>
+      <button type="submit" class="send" data-ar="إرسال" data-en="Send" data-fr="Envoyer">إرسال</button>
+      <div class="formnote" id="formNote"></div>
+    </form>
+  </section>
+</div>
+<footer>
+  <div class="foot">
+    <div class="ded"
+      data-ar="صدقة جارية عن محمد كوسا وديما غنوم وعائلاتهم. اللَّهُمَّ اجْعَلْهُ فِي مِيزَانِ حَسَنَاتِهِمْ."
+      data-en="A Sadaqa Jariyah on behalf of Mohamad Koussa and Dima Ghannoum and their families. O Allah, place it in the scale of their good deeds."
+      data-fr="Une Sadaqa Jariya au nom de Mohamad Koussa et Dima Ghannoum et de leurs familles. Ô Allah, place-la dans la balance de leurs bonnes actions.">
+      صدقة جارية عن محمد كوسا وديما غنوم وعائلاتهم. اللَّهُمَّ اجْعَلْهُ فِي مِيزَانِ حَسَنَاتِهِمْ.</div>
+    <div>© 2026 · <a href="privacy.html" data-ar="سياسة الخصوصية" data-en="Privacy Policy" data-fr="Politique de confidentialité">سياسة الخصوصية</a></div>
+  </div>
+</footer>
+<script>
+  // ---- Optional: paste a free Web3Forms access key (from web3forms.com, tied to
+  // mk_uz02@qalamoun.com) to receive messages straight in your inbox. Leave empty
+  // and the form opens the visitor's email app pre-addressed to you instead. ----
+  const WEB3FORMS_KEY = "";
+  const CONTACT_EMAIL = "mk_uz02@qalamoun.com";
+  const T = {
+    sent:   {ar:"تم الإرسال، شكرًا لك!", en:"Sent — thank you!", fr:"Envoyé — merci !"},
+    sending:{ar:"جارٍ الإرسال…", en:"Sending…", fr:"Envoi…"},
+    failed: {ar:"تعذّر الإرسال، حاول مرة أخرى.", en:"Couldn't send, please try again.", fr:"Échec de l'envoi, réessayez."},
+    opened: {ar:"تم فتح تطبيق البريد لديك لإتمام الإرسال.", en:"Your email app has opened to finish sending.", fr:"Votre messagerie s'est ouverte pour terminer l'envoi."}
+  };
+  let LANG = 'ar';
+  const setLang = (lang) => {
+    LANG = lang;
+    const rtl = lang === 'ar';
+    document.documentElement.lang = lang;
+    document.documentElement.dir = rtl ? 'rtl' : 'ltr';
+    document.body.dir = rtl ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+      el.innerHTML = el.getAttribute('data-' + lang);
+    });
+    document.querySelectorAll('[data-ph-' + lang + ']').forEach(el => {
+      el.setAttribute('placeholder', el.getAttribute('data-ph-' + lang));
+    });
+    document.querySelectorAll('#lang button').forEach(b =>
+      b.classList.toggle('active', b.getAttribute('data-lang') === lang));
+    // App screenshots in the chosen language.
+    document.querySelectorAll('img[data-shot]').forEach(img =>
+      img.src = 'assets/app/' + lang + '/' + img.getAttribute('data-shot') + '.jpg');
+    try { localStorage.setItem('mushaf_lang', lang); } catch(e){}
+  };
+  document.querySelectorAll('#lang button').forEach(b =>
+    b.addEventListener('click', () => setLang(b.getAttribute('data-lang'))));
+  let saved = 'ar';
+  try { saved = localStorage.getItem('mushaf_lang') || 'ar'; } catch(e){}
+  if (!['ar','en','fr'].includes(saved)) saved = 'ar';
+  setLang(saved);
+  // ---- Contact form ----
+  const form = document.getElementById('contactForm');
+  const note = document.getElementById('formNote');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('cName').value.trim();
+    const email = document.getElementById('cEmail').value.trim();
+    const msg = document.getElementById('cMsg').value.trim();
+    if (!name || !email || !msg) return;
+    if (WEB3FORMS_KEY) {
+      note.className = 'formnote'; note.textContent = T.sending[LANG];
+      try {
+        const r = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json', 'Accept':'application/json'},
+          body: JSON.stringify({
+            access_key: WEB3FORMS_KEY,
+            subject: 'Mus\'haf — contact from ' + name,
+            from_name: name,
+            name: name, email: email, message: msg
+          })
+        });
+        const data = await r.json();
+        if (data.success) { note.className = 'formnote ok'; note.textContent = T.sent[LANG]; form.reset(); }
+        else { note.className = 'formnote err'; note.textContent = T.failed[LANG]; }
+      } catch (err) { note.className = 'formnote err'; note.textContent = T.failed[LANG]; }
+    } else {
+      // No key set: open the visitor's email client pre-filled.
+      const subject = encodeURIComponent("Mus'haf — contact from " + name);
+      const body = encodeURIComponent(msg + "\n\n— " + name + " (" + email + ")");
+      window.location.href = 'mailto:' + CONTACT_EMAIL + '?subject=' + subject + '&body=' + body;
+      note.className = 'formnote ok'; note.textContent = T.opened[LANG];
+    }
+  });
+  // ---- Screenshots: drag + mouse-wheel horizontal scrolling ----
+  const strip = document.querySelector('.strip');
+  if (strip) {
+    let down = false, startX = 0, startLeft = 0, moved = false;
+    strip.addEventListener('pointerdown', (e) => {
+      down = true; moved = false; startX = e.clientX; startLeft = strip.scrollLeft;
+      strip.setPointerCapture(e.pointerId);
+    });
+    strip.addEventListener('pointermove', (e) => {
+      if (!down) return;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 3) moved = true;
+      strip.scrollLeft = startLeft - dx;
+    });
+    const end = () => { down = false; };
+    strip.addEventListener('pointerup', end);
+    strip.addEventListener('pointercancel', end);
+    // Turn vertical wheel into horizontal scroll over the gallery.
+    strip.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        strip.scrollLeft += e.deltaY;
+        e.preventDefault();
+      }
+    }, { passive: false });
+  }
+</script>
+</body>
+</html>

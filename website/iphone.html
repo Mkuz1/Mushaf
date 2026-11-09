@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مصحف للآيفون · Mus'haf for iPhone · Mus'haf pour iPhone</title>
+<meta name="description" content="Install Mus'haf on iPhone and iPad with SideStore, AltStore or Sideloadly and a free Apple ID.">
+<link rel="icon" href="assets/icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#2A1E12;--gold:#C5A059;--gold-d:#8C6B30;--green:#0E3D31}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:radial-gradient(circle at 50% 0,#FCF8EE,#EFE6D2);min-height:100vh;line-height:1.8}
+  body[dir="rtl"]{font-family:'Amiri','Inter',serif}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;max-width:820px;margin:0 auto;gap:12px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:700}
+  .brand img{width:40px;height:40px;border-radius:11px}
+  .lang{display:inline-flex;border:1.5px solid var(--gold);border-radius:30px;overflow:hidden}
+  .lang button{border:0;background:transparent;color:var(--gold-d);font-weight:600;font-size:14px;padding:7px 13px;cursor:pointer;font-family:inherit}
+  .lang button.active{background:var(--green);color:#F1E7CC}
+  main{max-width:820px;margin:0 auto;padding:10px 22px 60px}
+  h1{font-size:30px;margin:14px 0 4px}
+  .upd{color:#7a6a4d;font-size:14px;margin-bottom:18px}
+  h2{font-size:19px;margin:24px 0 6px;color:var(--gold-d)}
+  p{margin-bottom:8px;color:#3c2e1c}
+  code{background:rgba(197,160,89,.16);padding:1px 6px;border-radius:5px}
+  a.home{color:var(--gold-d);text-decoration:none;font-weight:600}
+  .block{display:none}
+  main a{color:var(--gold-d)}
+  main a.btn{color:#F1E7CC}
+  ol{margin:6px 0 10px;padding-inline-start:22px}
+  li{margin-bottom:6px;color:#3c2e1c}
+  .btn{display:inline-block;margin:6px 0 12px;background:var(--green);color:#F1E7CC;text-decoration:none;font-weight:600;padding:10px 20px;border-radius:30px}
+  .note{background:rgba(197,160,89,.14);border:1px solid rgba(197,160,89,.4);border-radius:12px;padding:10px 14px;margin:10px 0}
+</style>
+</head>
+<body dir="rtl">
+<nav>
+  <a class="brand home" href="index.html"><img src="assets/icon.png" alt=""><span>مصحف</span></a>
+  <div class="lang" id="lang">
+    <button data-lang="ar">ع</button>
+    <button data-lang="en">EN</button>
+    <button data-lang="fr">FR</button>
+  </div>
+</nav>
+
+<main>
+  <section class="block" data-block="ar">
+    <h1>المصحف على الآيفون والآيباد</h1>
+    <p>هو التطبيق نفسه الذي على أندرويد في كل شيء. ولأنه ليس على App Store بعد، يُثبَّت بتوقيعه بحساب Apple الخاص بك (يكفي حساب مجاني).</p>
+    <a class="btn" href="https://github.com/Mkuz1/Mushaf-releases/releases/latest/download/Mushaf-iOS.ipa">تحميل Mushaf-iOS.ipa</a>
+    <p class="note">مع حساب Apple المجاني: يجب تحديث التطبيق كل ٧ أيام (تفعل ذلك SideStore من الهاتف)، وبحد أقصى ٣ تطبيقات. تبقى ملاحظاتك وعلاماتك عند التحديث.</p>
+    <h2>بـ SideStore (موصى به: التحديث من الهاتف نفسه)</h2>
+    <ol>
+      <li>ثبّت SideStore مرة واحدة باتباع الخطوات في <a href="https://sidestore.io">sidestore.io</a> (تحتاج حاسوبًا مرة واحدة فقط).</li>
+      <li>على الآيفون حمّل الملف <b>Mushaf-iOS.ipa</b> من الزر أعلاه (يُحفظ في «الملفات»).</li>
+      <li>في SideStore: <b>My Apps</b> ثم <b>+</b> واختر الملف، وسجّل الدخول بحساب Apple عند الطلب.</li>
+      <li>إن طُلب ذلك: الإعدادات ← الخصوصية والأمن ← <b>وضع المطوّر</b> ← تشغيل، ثم الإعدادات ← عام ← <b>إدارة VPN والجهاز</b> ← وثوق.</li>
+      <li>حدّث التطبيق في SideStore قبل مرور ٧ أيام (يمكنه ذلك تلقائيًا في الخلفية).</li>
+    </ol>
+    <h2>بـ AltStore أو Sideloadly</h2>
+    <p><a href="https://altstore.io">AltStore</a> يعمل بالطريقة نفسها مع AltServer على حاسوبك في الشبكة نفسها. و<a href="https://sideloadly.io">Sideloadly</a> على Mac أو Windows: صِل الآيفون بالكابل، واسحب الملف إليه، وأدخل حساب Apple، ثم اضغط Start.</p>
+    <h2>بدون تثبيت</h2>
+    <p>افتح <a href="reader.html">القارئ</a> في Safari ثم مشاركة ← <b>إضافة إلى الشاشة الرئيسية</b>: يعمل بملء الشاشة كتطبيق.</p>
+  </section>
+
+  <section class="block" data-block="en">
+    <h1>Mus'haf on iPhone and iPad</h1>
+    <p>The same app as on Android, in everything. It isn't on the App Store yet, so you install it by signing it with your own Apple ID (a free one works).</p>
+    <a class="btn" href="https://github.com/Mkuz1/Mushaf-releases/releases/latest/download/Mushaf-iOS.ipa">Download Mushaf-iOS.ipa</a>
+    <p class="note">With a free Apple ID the app needs a refresh every 7 days (SideStore does it from the phone), and you can have up to 3 such apps. Your notes and bookmarks are kept when it refreshes.</p>
+    <h2>With SideStore (recommended: refreshes on the phone itself)</h2>
+    <ol>
+      <li>Install SideStore once, following <a href="https://sidestore.io">sidestore.io</a> (this needs a computer once).</li>
+      <li>On the iPhone, download <b>Mushaf-iOS.ipa</b> with the button above (it goes to Files).</li>
+      <li>In SideStore: <b>My Apps</b> ▸ <b>+</b> ▸ pick the file, and sign in with your Apple ID when asked.</li>
+      <li>If asked: Settings ▸ Privacy &amp; Security ▸ <b>Developer Mode</b> ▸ On, and Settings ▸ General ▸ <b>VPN &amp; Device Management</b> ▸ Trust.</li>
+      <li>Refresh it in SideStore before the 7 days are up (it can do this in the background).</li>
+    </ol>
+    <h2>With AltStore or Sideloadly</h2>
+    <p><a href="https://altstore.io">AltStore</a> works the same way, with AltServer on your computer on the same Wi-Fi. <a href="https://sideloadly.io">Sideloadly</a> on a Mac or PC: connect the iPhone with a cable, drop the file in, enter your Apple ID and press Start.</p>
+    <h2>Without installing</h2>
+    <p>Open the <a href="reader.html">web reader</a> in Safari, then Share ▸ <b>Add to Home Screen</b>: it opens full screen like an app.</p>
+  </section>
+
+  <section class="block" data-block="fr">
+    <h1>Mus'haf sur iPhone et iPad</h1>
+    <p>La même application que sur Android, en tout point. Elle n'est pas encore sur l'App Store : on l'installe en la signant avec son propre identifiant Apple (un compte gratuit suffit).</p>
+    <a class="btn" href="https://github.com/Mkuz1/Mushaf-releases/releases/latest/download/Mushaf-iOS.ipa">Télécharger Mushaf-iOS.ipa</a>
+    <p class="note">Avec un identifiant Apple gratuit, l'application doit être actualisée tous les 7 jours (SideStore le fait depuis le téléphone), et 3 applications de ce type au maximum. Vos notes et signets sont conservés.</p>
+    <h2>Avec SideStore (recommandé : actualisation depuis le téléphone)</h2>
+    <ol>
+      <li>Installez SideStore une fois, en suivant <a href="https://sidestore.io">sidestore.io</a> (un ordinateur est nécessaire une seule fois).</li>
+      <li>Sur l'iPhone, téléchargez <b>Mushaf-iOS.ipa</b> avec le bouton ci-dessus (il va dans Fichiers).</li>
+      <li>Dans SideStore : <b>My Apps</b> ▸ <b>+</b> ▸ choisissez le fichier, et connectez-vous avec votre identifiant Apple.</li>
+      <li>Si demandé : Réglages ▸ Confidentialité et sécurité ▸ <b>Mode développeur</b> ▸ Activé, et Réglages ▸ Général ▸ <b>VPN et gestion de l'appareil</b> ▸ Faire confiance.</li>
+      <li>Actualisez-la dans SideStore avant la fin des 7 jours (il peut le faire en arrière-plan).</li>
+    </ol>
+    <h2>Avec AltStore ou Sideloadly</h2>
+    <p><a href="https://altstore.io">AltStore</a> fonctionne de la même façon, avec AltServer sur votre ordinateur sur le même Wi-Fi. <a href="https://sideloadly.io">Sideloadly</a> sur Mac ou PC : branchez l'iPhone, déposez le fichier, saisissez votre identifiant Apple et appuyez sur Start.</p>
+    <h2>Sans installation</h2>
+    <p>Ouvrez le <a href="reader.html">lecteur web</a> dans Safari, puis Partager ▸ <b>Sur l'écran d'accueil</b> : il s'ouvre en plein écran comme une application.</p>
+  </section>
+</main>
+
+<script>
+  const apply = (lang) => {
+    if (!['ar','en','fr'].includes(lang)) lang = 'ar';
+    const rtl = lang === 'ar';
+    document.documentElement.lang = lang;
+    document.documentElement.dir = rtl ? 'rtl' : 'ltr';
+    document.body.dir = rtl ? 'rtl' : 'ltr';
+    document.querySelectorAll('.block').forEach(b =>
+      b.style.display = (b.getAttribute('data-block') === lang) ? 'block' : 'none');
+    document.querySelectorAll('#lang button').forEach(b =>
+      b.classList.toggle('active', b.getAttribute('data-lang') === lang));
+    try { localStorage.setItem('mushaf_lang', lang); } catch(e){}
+  };
+  document.querySelectorAll('#lang button').forEach(b =>
+    b.addEventListener('click', () => apply(b.getAttribute('data-lang'))));
+  let s = 'ar';
+  try { s = localStorage.getItem('mushaf_lang') || 'ar'; } catch(e){}
+  apply(s);
+</script>
+</body>
+</html>

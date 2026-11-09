@@ -1,0 +1,41 @@
+# Deploys website/ to Cloudflare Pages (project "mushafapp", served at
+# www.mushafapp.com) whenever it changes on main, or on demand from the Actions tab.
+#
+# Needs two repository secrets (Settings ▸ Secrets and variables ▸ Actions):
+#   CLOUDFLARE_API_TOKEN   — a token with the "Cloudflare Pages: Edit" permission
+#   CLOUDFLARE_ACCOUNT_ID  — the account ID shown in the Cloudflare dashboard
+name: Website
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["website/**", ".github/workflows/website.yml"]
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency: website
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the Cloudflare secrets
+        id: secrets
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$ACCOUNT" ]; then
+            echo "::error::Add the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets to deploy the site"
+            exit 1
+          fi
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy website --project-name=mushafapp --branch=main --commit-dirty=true

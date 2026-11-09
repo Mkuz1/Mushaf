@@ -1,0 +1,16 @@
+{
+  "name": "المصحف الشريف — Mus'haf",
+  "short_name": "مصحف",
+  "description": "The Madinah Mushaf, beautifully simple — read in your browser, works offline.",
+  "start_url": "reader.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F8F3E8",
+  "theme_color": "#F8F3E8",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    { "src": "assets/icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

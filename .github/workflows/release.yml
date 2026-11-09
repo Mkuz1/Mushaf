@@ -1,0 +1,321 @@
+# Builds Mus'haf for Android (signed APK + Play bundle), Windows (per-user installer and
+# portable zip), macOS (DMG) and iPhone/iPad (unsigned IPA, for sideloading with SideStore
+# or AltStore) — Quran Reader HD's apps under Mushaf's name — and
+# publishes them together as GitHub Release v<version>. Existing releases are skipped.
+#
+# Versions: `version:` in flutter_app/pubspec.yaml (name+code; the code must be higher
+# than the last Google Play upload) and MushafMac/VERSION (keep the same name).
+# Signing secrets (Settings ▸ Secrets and variables ▸ Actions):
+#   MUSHAF_KEYSTORE_BASE64, MUSHAF_KEYSTORE_PASSWORD, MUSHAF_KEY_ALIAS, MUSHAF_KEY_PASSWORD
+# Optional: MUSHAF_RELEASES_TOKEN, a token that can publish releases to the public
+# Mkuz1/Mushaf-releases repo. With it, the APK, installer and DMG are also published
+# there, which is where the apps look for update notifications.
+#
+# Branch pushes only build and test; main, tags and manual runs publish.
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, claude/loving-pascal-ity1hl]
+    paths: [".github/workflows/release.yml", "flutter_app/**", "MushafMac/**", "data/**", "pages/**"]
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+concurrency: release-${{ github.ref }}
+
+env:
+  FLUTTER_VERSION: 3.47.7
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      name: ${{ steps.v.outputs.name }}
+      code: ${{ steps.v.outputs.code }}
+      publish: ${{ steps.v.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          full=$(sed -nE 's/^version: *([0-9.]+\+[0-9]+).*/\1/p' flutter_app/pubspec.yaml)
+          name=${full%+*}
+          mac=$(tr -d '[:space:]' < MushafMac/VERSION)
+          if [ "$mac" != "$name" ]; then echo "::error::MushafMac/VERSION ($mac) differs from pubspec ($name)"; exit 1; fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "code=${full#*+}" >> "$GITHUB_OUTPUT"
+          publish=false
+          if ! gh release view "v$name" >/dev/null 2>&1; then
+            if [ "$GITHUB_EVENT_NAME" != push ] || [ "$GITHUB_REF" = refs/heads/main ] || [[ "$GITHUB_REF" == refs/tags/* ]]; then publish=true; fi
+          fi
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+
+  android:
+    needs: version
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flutter_app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - name: Signing key
+        env:
+          KEYSTORE: ${{ secrets.MUSHAF_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.MUSHAF_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.MUSHAF_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.MUSHAF_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE" ]; then
+            if [ "${{ needs.version.outputs.publish }}" = true ]; then echo "::error::Signing secrets missing; refusing to publish"; exit 1; fi
+            echo "::warning::No MUSHAF_KEYSTORE_BASE64 secret: building with the debug key"; exit 0
+          fi
+          echo "$KEYSTORE" | base64 -d > android/app/release.jks
+          printf 'storeFile=release.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+            "$STORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > android/key.properties
+      - name: Build APK + AAB
+        run: |
+          flutter build apk --release
+          flutter build appbundle --release
+          v=${{ needs.version.outputs.name }}
+          mkdir -p ../dist
+          cp build/app/outputs/flutter-apk/app-release.apk "../dist/Mushaf-$v.apk"
+          # The Play bundle is kept out of the (public) release: it is this run's play-bundle download.
+          mkdir -p ../bundle
+          cp build/app/outputs/bundle/release/app-release.aab "../bundle/Mushaf-$v.aab"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: play-bundle
+          path: bundle/
+          retention-days: 90
+
+  windows:
+    needs: version
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: flutter_app
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Build
+        run: flutter build windows --release
+      - name: Installer and portable zip
+        run: |
+          $release = "build\windows\x64\runner\Release"
+          # The Visual C++ runtime next to the exe, so the app runs on PCs without it installed.
+          foreach ($dll in 'msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll') {
+            Copy-Item "$env:WINDIR\System32\$dll" $release
+          }
+          $version = "${{ needs.version.outputs.name }}"
+          New-Item -ItemType Directory -Force ..\dist | Out-Null
+          Compress-Archive -Path "$release\*" -DestinationPath "..\dist\Mushaf-$version-Windows-Portable.zip"
+          $iscc = Get-Command iscc -ErrorAction SilentlyContinue
+          if (-not $iscc) {
+            choco install innosetup -y --no-progress | Out-Null
+            $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          } else { $iscc = $iscc.Source }
+          & $iscc "/DAppVersion=$version" "/DSourceDir=$((Resolve-Path $release).Path)" "/DOutputDir=$((Resolve-Path ..\dist).Path)" windows\installer.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Get-ChildItem ..\dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: dist/
+
+  # After the iPhone build rather than beside it: queued next to it, the second macOS job has been
+  # cancelled before a runner was free.
+  macos:
+    needs: [version, ios]
+    if: always() && needs.version.result == 'success'
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: MushafMac
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode 26
+        # macos-15 runners (far more of them than macos-26) carry Xcode 26, which has the macOS 26 SDK.
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)"
+          xcodebuild -version
+      - name: Toolchain
+        run: swift --version
+      - name: Build DMG
+        run: |
+          ./make-dmg.sh
+          mkdir -p ../dist
+          mv build/Mushaf.dmg "../dist/Mushaf-${{ needs.version.outputs.name }}.dmg"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: dist/
+
+  # The Flutter app for iPhone and iPad. Unsigned: SideStore, AltStore or Xcode sign it with
+  # the user's own Apple ID when installing (see ios-assets/SIDELOAD.md).
+  ios:
+    needs: version
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: flutter_app
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode 26
+        # macos-15 runners (far more of them than macos-26) carry Xcode 26, which has the macOS 26 SDK.
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)"
+          xcodebuild -version
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Build IPA
+        run: |
+          flutter build ios --release --no-codesign
+          mkdir -p Payload ../dist
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qry "../dist/Mushaf-${{ needs.version.outputs.name }}-iOS.ipa" Payload
+          ls -la ../dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios
+          path: dist/
+
+  # Android and Windows are required; the macOS and iPhone builds (macOS runners, which can be
+  # unavailable when the account's macOS minutes run out) go in when they built, and the notes
+  # say so when they didn't.
+  publish:
+    needs: [version, android, windows, macos, ios]
+    if: >-
+      always() && needs.version.outputs.publish == 'true' &&
+      needs.android.result == 'success' && needs.windows.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+          pattern: '{android,windows,macos,ios}'
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          V: ${{ needs.version.outputs.name }}
+          CODE: ${{ needs.version.outputs.code }}
+        run: |
+          ls -la dist
+          sha() { if [ -f "$1" ]; then sha256sum "$1" | cut -d' ' -f1; fi; }
+          sed -e "s/{{VERSION}}/$V/g" -e "s/{{CODE}}/$CODE/g" \
+              -e "s/{{SHA256_APK}}/$(sha dist/Mushaf-$V.apk)/" \
+              -e "s/{{SHA256_SETUP}}/$(sha dist/Mushaf-$V-Setup.exe)/" \
+              -e "s/{{SHA256_ZIP}}/$(sha dist/Mushaf-$V-Windows-Portable.zip)/" \
+              -e "s/{{SHA256_DMG}}/$(sha dist/Mushaf-$V.dmg)/" \
+              -e "s/{{SHA256_IPA}}/$(sha dist/Mushaf-$V-iOS.ipa)/" \
+              .github/release-notes.md > "$RUNNER_TEMP/notes.md"
+          # A platform that didn't build: its install paragraph and checksum go, and a line says so.
+          missing=""
+          if [ ! -f "dist/Mushaf-$V.dmg" ]; then
+            sed -i -e '/^\*\*macOS\*\*/d' -e "/Mushaf-$V\.dmg/d" "$RUNNER_TEMP/notes.md"; missing="macOS"
+          fi
+          if [ ! -f "dist/Mushaf-$V-iOS.ipa" ]; then
+            sed -i -e '/^\*\*iPhone and iPad\*\*/d' -e "/Mushaf-$V-iOS\.ipa/d" "$RUNNER_TEMP/notes.md"
+            missing="${missing:+$missing and }iPhone/iPad"
+          fi
+          if [ -n "$missing" ]; then
+            sed -i "s|^### Install\$|### Install\n_No new $missing build in this release: those apps stay on the previous version for now._\n|" "$RUNNER_TEMP/notes.md"
+          fi
+          gh release create "v$V" dist/* --target "$GITHUB_SHA" --latest \
+            --title "Mus'haf $V" --notes-file "$RUNNER_TEMP/notes.md"
+      - name: Publish to the public releases repo
+        env:
+          RELEASES_TOKEN: ${{ secrets.MUSHAF_RELEASES_TOKEN }}
+          V: ${{ needs.version.outputs.name }}
+        run: |
+          if [ -z "$RELEASES_TOKEN" ]; then echo "::warning::MUSHAF_RELEASES_TOKEN not set; not published to Mkuz1/Mushaf-releases"; exit 0; fi
+          # Stable names, so releases/latest/download/<name> (the apps' and website's download
+          # links) always gives the newest build. The Play bundle stays private.
+          mkdir pub
+          cp "dist/Mushaf-$V.apk" pub/Mushaf-Android.apk
+          cp "dist/Mushaf-$V-Setup.exe" pub/Mushaf-Windows-Setup.exe
+          cp "dist/Mushaf-$V-Windows-Portable.zip" pub/Mushaf-Windows-Portable.zip
+          # Without a new macOS or iPhone build, the previous one is carried over, so the
+          # releases/latest/download links on the website and in the apps keep working.
+          for pair in "Mushaf-$V.dmg:Mushaf-macOS.dmg" "Mushaf-$V-iOS.ipa:Mushaf-iOS.ipa"; do
+            built="${pair%%:*}"; public="${pair##*:}"
+            if [ -f "dist/$built" ]; then
+              cp "dist/$built" "pub/$public"
+            else
+              GH_TOKEN="$RELEASES_TOKEN" gh release download --repo Mkuz1/Mushaf-releases \
+                --pattern "$public" --dir pub || echo "::warning::no earlier $public to carry over"
+            fi
+          done
+          sed -e '/\.aab/d' -e "s/Mushaf-$V-Setup\.exe/Mushaf-Windows-Setup.exe/g" -e "s/Mushaf-$V\.apk/Mushaf-Android.apk/g" \
+              -e "s/Mushaf-$V\.dmg/Mushaf-macOS.dmg/g" -e "s/Mushaf-$V-Windows-Portable/Mushaf-Windows-Portable/g" \
+              -e "s/Mushaf-$V-iOS\.ipa/Mushaf-iOS.ipa/g" "$RUNNER_TEMP/notes.md" > "$RUNNER_TEMP/public-notes.md"
+          GH_TOKEN="$RELEASES_TOKEN" gh release create "v$V" pub/* \
+            --repo Mkuz1/Mushaf-releases --latest --title "Mus'haf $V" --notes-file "$RUNNER_TEMP/public-notes.md"
+
+  # The app on an Android emulator, online like a phone (Quran Reader HD's device test).
+  # Informational: on this repository's runners the emulator has not been able to boot,
+  # so it never blocks a release.
+  android-device:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+        working-directory: flutter_app
+      - name: Run on an emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          working-directory: flutter_app
+          script: |
+            adb shell cmd uimode night yes
+            flutter test integration_test/app_test.dart -d emulator-5554 --reporter expanded

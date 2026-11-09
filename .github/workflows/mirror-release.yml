@@ -1,0 +1,56 @@
+# Copies an existing release of this (private) repo — its APK, Windows installer
+# and zip, and DMG — to the public Mkuz1/Mushaf-releases repo, where the apps look
+# for updates and the website links its downloads. New releases are published there
+# by release.yml; this is for releases made before that, or to redo one.
+# Needs the MUSHAF_RELEASES_TOKEN secret (Contents: read & write on Mushaf-releases).
+name: Mirror release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to copy (e.g. v1.10.0)
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download the release from this repo
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir dist
+          gh release download "$TAG" --dir dist --pattern '*.apk' --pattern '*-Setup.exe' --pattern '*-Windows-Portable.zip' --pattern '*.dmg' --pattern '*-iOS.ipa'
+          gh release view "$TAG" --json body --jq .body > notes.md
+          # Stable names, as release.yml publishes them (releases/latest/download/<name>).
+          mkdir pub
+          mv dist/*.apk pub/Mushaf-Android.apk
+          mv dist/*-Setup.exe pub/Mushaf-Windows-Setup.exe
+          mv dist/*-Windows-Portable.zip pub/Mushaf-Windows-Portable.zip
+          mv dist/*.dmg pub/Mushaf-macOS.dmg
+          if ls dist/*-iOS.ipa >/dev/null 2>&1; then mv dist/*-iOS.ipa pub/Mushaf-iOS.ipa; fi
+          ls -la pub
+      - name: Publish to Mkuz1/Mushaf-releases
+        env:
+          GH_TOKEN: ${{ secrets.MUSHAF_RELEASES_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then echo "::error::MUSHAF_RELEASES_TOKEN is not set"; exit 1; fi
+          # The public repo only carries the downloads; the Play bundle stays private.
+          V="${TAG#v}"
+          sed -i -e '/\.aab/d' -e "s/Mushaf-$V-Setup\.exe/Mushaf-Windows-Setup.exe/g" -e "s/Mushaf-$V\.apk/Mushaf-Android.apk/g" \
+              -e "s/Mushaf-$V\.dmg/Mushaf-macOS.dmg/g" -e "s/Mushaf-$V-Windows-Portable/Mushaf-Windows-Portable/g" \
+              -e "s/Mushaf-$V-iOS\.ipa/Mushaf-iOS.ipa/g" notes.md
+          if gh release view "$TAG" --repo Mkuz1/Mushaf-releases >/dev/null 2>&1; then
+            gh release upload "$TAG" pub/* --repo Mkuz1/Mushaf-releases --clobber
+          else
+            gh release create "$TAG" pub/* --repo Mkuz1/Mushaf-releases --latest \
+              --title "Mus'haf ${TAG#v}" --notes-file notes.md
+          fi
+          gh release view "$TAG" --repo Mkuz1/Mushaf-releases --json url,assets --jq '.url, (.assets[].name)'

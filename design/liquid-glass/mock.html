@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Mushaf Liquid Glass</title>
+<style>
+  @font-face { font-family: Amiri; src: url(../../flutter_app/assets/fonts/Amiri-Regular.ttf); }
+  @font-face { font-family: Amiri; src: url(../../flutter_app/assets/fonts/Amiri-Bold.ttf); font-weight: 700; }
+  :root {
+    --bg1: #FBF6EA; --bg2: #EFE4CB; --ink: #2A1E12; --gold: #B8893A; --gold-soft: rgba(197,160,89,.30);
+    --label: #3A2A14; --label2: rgba(58,42,20,.62);
+    --glass: rgba(255,252,244,.34); --glass-strong: rgba(255,252,244,.52);
+    --rim: rgba(255,255,255,.95); --rim-low: rgba(255,255,255,.25); --shadow: rgba(80,56,20,.18);
+    --tint: rgba(197,160,89,.22);
+  }
+  body.dark {
+    --bg1: #121110; --bg2: #0B0A09; --ink: #E7DCBE; --gold: #D6B06A; --gold-soft: rgba(214,176,106,.26);
+    --label: #F2E8CF; --label2: rgba(242,232,207,.58);
+    --glass: rgba(40,36,30,.36); --glass-strong: rgba(48,43,36,.55);
+    --rim: rgba(255,240,210,.42); --rim-low: rgba(255,240,210,.08); --shadow: rgba(0,0,0,.55);
+    --tint: rgba(214,176,106,.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 430px; height: 932px; overflow: hidden; }
+  body {
+    font-family: Amiri, Inter, sans-serif; color: var(--label);
+    background: radial-gradient(120% 80% at 50% 40%, var(--bg1), var(--bg2));
+    position: relative;
+  }
+
+  /* ---- the page ---- */
+  .page {
+    position: absolute; left: 4px; top: 118px; width: 422px; height: 682.5px;
+    background: var(--ink);
+    -webkit-mask: url(../../website/pages/page003.png) center / contain no-repeat; mask: url(../../website/pages/page003.png) center / contain no-repeat;
+  }
+  .hl { position: absolute; left: 4px; top: 118px; width: 422px; height: 682.5px; }
+  .hl i { position: absolute; background: var(--gold-soft); border-radius: 6px; }
+
+  /* ---- Liquid Glass material ---- */
+  .glass {
+    position: absolute; background: var(--glass);
+    backdrop-filter: blur(9px) saturate(190%) brightness(1.04);
+    -webkit-backdrop-filter: blur(9px) saturate(190%) brightness(1.04);
+    box-shadow:
+      0 10px 30px -6px var(--shadow),
+      0 1px 2px rgba(0,0,0,.06),
+      inset 0 1px 1px var(--rim),
+      inset 0 -1px 1px var(--rim-low),
+      inset 0 0 18px rgba(255,255,255,.10);
+  }
+  /* specular rim: a light edge that is brightest at top-left and bottom-right */
+  .glass::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.2px; pointer-events: none;
+    background: linear-gradient(135deg, var(--rim) 0%, rgba(255,255,255,0) 32%, rgba(255,255,255,0) 64%, var(--rim) 100%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+  }
+  /* soft sheen across the upper half */
+  .glass::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0) 55%);
+  }
+  body.dark .glass::after { background: linear-gradient(180deg, rgba(255,240,210,.08), rgba(255,255,255,0) 55%); }
+
+  .circle { width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; }
+  .circle svg, .tab svg, .ctl svg { position: relative; z-index: 1; }
+  svg { stroke: var(--label); fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ---- status bar ---- */
+  .status { position: absolute; top: 0; left: 0; right: 0; height: 54px; direction: ltr;
+            display: flex; align-items: center; justify-content: space-between; padding: 6px 34px 0 46px;
+            font: 600 17px Inter, sans-serif; color: var(--label); }
+  .status .r { display: flex; gap: 7px; align-items: center; }
+  .island { position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 126px; height: 37px;
+            background: #000; border-radius: 20px; }
+
+  /* ---- top controls ---- */
+  .top-l { top: 60px; left: 16px; }
+  .top-r { top: 60px; right: 16px; }
+  .title { top: 60px; left: 50%; transform: translateX(-50%); height: 50px; padding: 0 24px; border-radius: 25px;
+           display: flex; flex-direction: column; justify-content: center; align-items: center; white-space: nowrap; }
+  .title b { font: 700 19px/1.1 Amiri; position: relative; z-index: 1; }
+  .title small { font: 13px/1.2 Amiri; color: var(--label2); position: relative; z-index: 1; }
+
+  /* ---- now playing ---- */
+  .player { left: 14px; right: 14px; bottom: 112px; height: 74px; border-radius: 37px;
+            display: flex; align-items: center; padding: 0 12px 0 10px; gap: 10px; background: var(--glass-strong); }
+  .avatar { width: 52px; height: 52px; border-radius: 50%; position: relative; z-index: 1; flex: none;
+            background: radial-gradient(circle at 35% 30%, #F3DFA8, #C5A059 55%, #8C6B30);
+            display: grid; place-items: center; box-shadow: inset 0 1px 2px rgba(255,255,255,.7), 0 2px 6px rgba(0,0,0,.18); }
+  .avatar svg { stroke: #fff; }
+  .who { flex: 1; min-width: 0; position: relative; z-index: 1; }
+  .who b { display: block; font: 700 17px/1.25 Amiri; }
+  .who small { font: 13.5px/1.2 Amiri; color: var(--label2); }
+  .wave { display: inline-flex; gap: 2px; align-items: center; height: 12px; margin-inline-start: 6px; vertical-align: middle; }
+  .wave i { width: 2.5px; border-radius: 2px; background: var(--gold); }
+  .ctl { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; position: relative; z-index: 1; }
+  .ctl.main { width: 50px; height: 50px; background: var(--tint); box-shadow: inset 0 1px 1px var(--rim); }
+  .ctl.main svg { fill: var(--label); stroke: none; }
+  .progress { position: absolute; left: 34px; right: 34px; bottom: 4px; height: 2.5px; border-radius: 2px;
+              background: rgba(127,100,50,.18); z-index: 1; }
+  .progress i { position: absolute; right: 0; top: 0; bottom: 0; width: 38%; border-radius: 2px; background: var(--gold); }
+
+  /* ---- tab bar ---- */
+  .tabs { left: 14px; right: 82px; bottom: 30px; height: 66px; border-radius: 33px;
+          display: flex; align-items: center; justify-content: space-around; padding: 0 6px; }
+  .tab { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+         width: 74px; height: 56px; justify-content: center; border-radius: 28px; font: 12px Amiri; color: var(--label2); }
+  .tab svg { stroke: var(--label2); }
+  .tab.on { background: var(--tint); color: var(--gold); box-shadow: inset 0 1px 1px var(--rim), 0 2px 8px -2px var(--shadow); }
+  .tab.on svg { stroke: var(--gold); }
+  .search { left: auto; right: 14px; bottom: 30px; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; }
+  .home { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 140px; height: 5px;
+          border-radius: 3px; background: var(--label); opacity: .85; }
+</style>
+</head>
+<body>
+  <div class="page"></div>
+  <div class="hl" id="hl"></div>
+
+  <div class="status"><span>9:41</span><span class="r">
+    <svg width="18" height="12" viewBox="0 0 18 12" style="stroke:none;fill:var(--label)"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+    <svg width="17" height="12" viewBox="0 0 17 12"><path d="M1.5 4.2a10 10 0 0 1 14 0M4 7a6.3 6.3 0 0 1 9 0M6.6 9.6a2.6 2.6 0 0 1 3.8 0" stroke-width="1.8"/></svg>
+    <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".7" y=".7" width="22" height="11.6" rx="3.5" stroke-width="1.1" opacity=".5"/><rect x="2.5" y="2.5" width="17" height="8" rx="2" style="fill:var(--label);stroke:none"/><path d="M24.6 4.5v4" stroke-width="1.6" opacity=".5"/></svg>
+  </span></div>
+  <div class="island"></div>
+
+  <!-- top: index · title · bookmark -->
+  <div class="glass circle top-r"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r=".6"/><circle cx="4" cy="12" r=".6"/><circle cx="4" cy="18" r=".6"/></svg></div>
+  <div class="glass title"><b>سورة البقرة</b><small>صفحة ٣ · الجزء ١</small></div>
+  <div class="glass circle top-l"><svg width="21" height="21" viewBox="0 0 24 24" style="fill:var(--gold);stroke:var(--gold)"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg></div>
+
+  <!-- now playing -->
+  <div class="glass player">
+    <div class="avatar"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg></div>
+    <div class="who">
+      <b>مشاري راشد العفاسي <span class="wave"><i style="height:6px"></i><i style="height:11px"></i><i style="height:8px"></i><i style="height:12px"></i><i style="height:5px"></i></span></b>
+      <small>سورة البقرة · الآية ٨</small>
+    </div>
+    <div class="ctl"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M5 5v14M19 5L9 12l10 7z" style="fill:var(--label)"/></svg></div>
+    <div class="ctl main"><svg width="22" height="22" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4" height="15" rx="1.3"/><rect x="14" y="4.5" width="4" height="15" rx="1.3"/></svg></div>
+    <div class="ctl"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M19 5v14M5 5l10 7-10 7z" style="fill:var(--label)"/></svg></div>
+    <div class="progress"><i></i></div>
+  </div>
+
+  <!-- tab bar + search -->
+  <div class="glass tabs">
+    <div class="tab on"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M3 5.5C5.5 4 9 4 12 6c3-2 6.5-2 9-.5V19c-2.5-1.5-6-1.5-9 .5-3-2-6.5-2-9-.5z"/><path d="M12 6v13.5"/></svg>المصحف</div>
+    <div class="tab"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 5h9M8.5 3v2M6 5c.8 3.5 3 6 6 7.5M11 5c-.8 3.5-3 6.5-6.5 8"/><path d="M12 21l4.5-10 4.5 10M13.6 17.5h5.8"/></svg>التفسير</div>
+    <div class="tab"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>ليلي</div>
+    <div class="tab"><svg width="24" height="24" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M12 4v16"/></svg>صفحتان</div>
+  </div>
+  <div class="glass search"><svg width="23" height="23" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L20 20"/></svg></div>
+  <div class="home"></div>
+
+<script>
+  if (location.hash === '#dark') document.body.classList.add('dark');
+  // Highlight the ayah being recited (2:8) from the app's own ayah boxes.
+  const rects = [[81, 241, 171, 68], [80, 344, 872, 83]], k = 422 / 1024;
+  const hl = document.getElementById('hl');
+  for (const [x, y, w, h] of rects) {
+    const i = document.createElement('i');
+    Object.assign(i.style, { left: x * k + 'px', top: y * k + 'px', width: w * k + 'px', height: h * k + 'px' });
+    hl.appendChild(i);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+# Builds the macOS DMG for a release that was published without it (the macOS runners weren't
+# available when it was released) and adds it to that release here and in Mkuz1/Mushaf-releases,
+# where the apps and the website's download links find it. Run it from the Actions tab with the
+# release's tag. It builds the branch it is run from (main: the release plus any fix to the Mac
+# app since); with no tag it only builds, to check the Mac app compiles.
+name: Add macOS build
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to add it to (e.g. v1.10.8); empty to only build
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode 26
+        # macos-15 runners (far more of them than macos-26) carry Xcode 26, which has the macOS 26 SDK.
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)"
+          xcodebuild -version
+      - name: Build DMG
+        working-directory: MushafMac
+        run: ./make-dmg.sh
+      - name: Add it to the releases
+        if: inputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASES_TOKEN: ${{ secrets.MUSHAF_RELEASES_TOKEN }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          V="${TAG#v}"
+          cp MushafMac/build/Mushaf.dmg "Mushaf-$V.dmg"
+          SHA=$(shasum -a 256 "Mushaf-$V.dmg" | cut -d' ' -f1)
+          # The notes' "no new macOS build" line becomes the macOS install paragraph, and the
+          # checksum table gets its row.
+          fix_notes() {  # repo, file name shown
+            gh release view "$TAG" --repo "$1" --json body --jq .body > notes.md
+            NAME="$2" SHA="$SHA" python3 - <<'PY'
+          import os, re
+          body = open('notes.md').read()
+          name, sha = os.environ['NAME'], os.environ['SHA']
+          para = (f"**macOS** (macOS 26 or later) — download **{name}**, open it and drag *Mus'haf* into "
+                  "Applications. The app isn't signed with an Apple Developer ID yet, so the first time, "
+                  "right-click the app, choose **Open**, then confirm.")
+          # Only the macOS part of the notice goes ("macOS and iPhone/iPad" leaves the iPhone part).
+          def notice(m):
+              rest = m.group(1).replace('macOS and ', '').replace('macOS', '').strip()
+              return (f"_No new {rest} build in this release: those apps stay on the previous version for now._\n\n"
+                      if rest else '') + para
+          body, n = re.subn(r"^_No new (.*?) build in this release:[^\n]*_", notice, body, flags=re.M)
+          if n == 0 and name not in body:
+              body = body.replace('**Google Play**', para + '\n\n**Google Play**', 1)
+          if f'| {name} |' not in body:
+              body = body.rstrip('\n') + f"\n| {name} | `{sha}` |\n"
+          open('notes.md', 'w').write(body)
+          PY
+            gh release edit "$TAG" --repo "$1" --notes-file notes.md
+          }
+          gh release upload "$TAG" "Mushaf-$V.dmg" --clobber
+          fix_notes "$GITHUB_REPOSITORY" "Mushaf-$V.dmg"
+          if [ -z "$RELEASES_TOKEN" ]; then echo "::warning::MUSHAF_RELEASES_TOKEN not set"; exit 0; fi
+          cp "Mushaf-$V.dmg" Mushaf-macOS.dmg
+          GH_TOKEN="$RELEASES_TOKEN" gh release upload "$TAG" Mushaf-macOS.dmg --repo Mkuz1/Mushaf-releases --clobber
+          GH_TOKEN="$RELEASES_TOKEN" fix_notes Mkuz1/Mushaf-releases Mushaf-macOS.dmg

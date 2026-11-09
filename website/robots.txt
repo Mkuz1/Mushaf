@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /pages/
+
+Sitemap: https://www.mushafapp.com/sitemap.xml

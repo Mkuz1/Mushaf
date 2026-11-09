@@ -1,0 +1,5 @@
+# Release signing — keep keys and passwords out of git
+keystore.properties
+*.jks
+*.keystore
+key.properties
