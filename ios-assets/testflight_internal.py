@@ -82,6 +82,17 @@ def main():
             print('   invitation sent again')
         except ApiError as e:
             print(f"   invitation: {str(e).replace(a.get('email') or '@@', '<email>')}")
+
+    # A public link on the external group: opened on an iPhone, it installs the app in TestFlight without any
+    # email (once Beta App Review has approved the build). Limited to 3 testers, as it shows in the public log.
+    for g in api.get(f"/v1/apps/{app['id']}/betaGroups", limit=50)['data']:
+        if g['attributes'].get('isInternalGroup'):
+            continue
+        g = api.patch(f"/v1/betaGroups/{g['id']}", {'data': {'type': 'betaGroups', 'id': g['id'], 'attributes': {
+            'publicLinkEnabled': True, 'publicLinkLimitEnabled': True, 'publicLinkLimit': 3}}})['data']
+        print(f"External group {g['attributes']['name']}: public link {g['attributes'].get('publicLink')}")
+        b = api.get(f"/v1/betaGroups/{g['id']}/builds", limit=5)['data']
+        print(f"   builds in it: {', '.join(x['attributes']['version'] for x in b) or 'none'}")
     sys.exit(0)
 
 
