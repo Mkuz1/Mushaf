@@ -13,6 +13,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -134,9 +135,19 @@ def age_rating(api, info):
     decl = api.get(f"/v1/appInfos/{info['id']}/ageRatingDeclaration")['data']
     have = decl['attributes']
     attrs = {k: 'NONE' for k in AGE_LEVELS if k in have}
-    attrs.update({k: False for k in AGE_NO if k in have})
-    api.patch(f"/v1/ageRatingDeclarations/{decl['id']}",
-              {'data': {'type': 'ageRatingDeclarations', 'id': decl['id'], 'attributes': attrs}})
+    attrs.update({k: False for k in AGE_NO})
+    for _ in range(10):
+        try:
+            api.patch(f"/v1/ageRatingDeclarations/{decl['id']}",
+                      {'data': {'type': 'ageRatingDeclarations', 'id': decl['id'], 'attributes': attrs}})
+            break
+        except ApiError as e:
+            # A question added since: Apple names it ("provide a value for the attribute 'x'"); answer no.
+            m = re.search(r"value for the attribute '(\w+)'", str(e))
+            if not m or m.group(1) in attrs:
+                raise
+            attrs[m.group(1)] = False
+            print(f'   also answering {m.group(1)}: no')
     print(f'   {len(attrs)} answers set to none/no')
 
 
@@ -145,7 +156,7 @@ AGE_LEVELS = ('alcoholTobaccoOrDrugUseOrReferences', 'contests', 'gamblingSimula
               'profanityOrCrudeHumor', 'sexualContentGraphicAndNudity', 'sexualContentOrNudity',
               'violenceCartoonOrFantasy', 'violenceRealistic', 'violenceRealisticProlongedGraphicOrSadistic')
 AGE_NO = ('gambling', 'unrestrictedWebAccess', 'lootBox', 'messagingAndChat', 'parentalControls', 'ageAssurance',
-          'userGeneratedContent', 'advertising', 'healthOrWellnessTopics')
+          'userGeneratedContent', 'advertising', 'healthOrWellnessTopics', 'socialMedia')
 
 
 @step('Price: free')
@@ -224,11 +235,11 @@ def attach_build(api, app, ver, cfg):
 
 
 # Screenshot folders, and the display type App Store Connect files them under (tried in order).
+# iPhone Duo has one display type for both screens: the unfolded shots first, then the folded ones (10 at most).
 SHOTS = [
-    ('iphone-6.9', ['APP_IPHONE_67']),
-    ('ipad-13', ['APP_IPAD_PRO_3GEN_129']),
-    ('iphone-duo-outer', ['APP_IPHONE_DUO_OUTER', 'APP_IPHONE_DUO_COVER', 'APP_IPHONE_DUO']),
-    ('iphone-duo-inner', ['APP_IPHONE_DUO_INNER', 'APP_IPHONE_DUO_MAIN', 'APP_IPHONE_DUO_OPEN']),
+    (['iphone-6.9'], ['APP_IPHONE_67']),
+    (['ipad-13'], ['APP_IPAD_PRO_3GEN_129']),
+    (['iphone-duo-inner', 'iphone-duo-outer'], ['APP_IPHONE_DUO']),
 ]
 
 
@@ -244,16 +255,19 @@ def upload_shot(api, set_id, path):
         r.raise_for_status()
     api.patch(f"/v1/appScreenshots/{shot['id']}", {'data': {'type': 'appScreenshots', 'id': shot['id'], 'attributes': {
         'uploaded': True, 'sourceFileChecksum': hashlib.md5(data).hexdigest()}}})
+    return shot['id']
 
 
 @step('Screenshots')
 def screenshots(api, locs, cfg):
     root = HERE / 'appstore-assets'
+    uploaded = []
     for lang, loc in locs.items():
         sets = {s['attributes']['screenshotDisplayType']: s for s in
                 api.get(f"/v1/appStoreVersionLocalizations/{loc['id']}/appScreenshotSets", limit=50)['data']}
-        for folder, types in SHOTS:
-            files = sorted((root / folder / lang).glob('*.png'))
+        for folders, types in SHOTS:
+            folder = ' + '.join(folders)
+            files = [f for d in folders for f in sorted((root / d / lang).glob('*.png'))][:10]
             if not files:
                 continue
             done = False
@@ -268,7 +282,8 @@ def screenshots(api, locs, cfg):
                             'screenshotDisplayType': display}, 'relationships': {
                             'appStoreVersionLocalization': rel('appStoreVersionLocalizations', loc['id'])}}})['data']
                     for f in files:
-                        upload_shot(api, s['id'], f)
+                        uploaded.append((f'{cfg["locales"][lang]} {f.parent.parent.name}/{f.name}',
+                                         upload_shot(api, s['id'], f)))
                     print(f"   {cfg['locales'][lang]} {folder}: {len(files)} uploaded ({display})")
                     done = True
                     break
@@ -276,6 +291,23 @@ def screenshots(api, locs, cfg):
                     print(f"   {cfg['locales'][lang]} {folder} as {display}: {e}")
             if not done:
                 failures.append(f"screenshots {cfg['locales'][lang]} {folder}: no display type accepted")
+    # Apple checks each image after the upload (its size above all); wait for the verdicts.
+    pending = dict(uploaded)
+    for _ in range(40):
+        for name, sid in list(pending.items()):
+            st = api.get(f'/v1/appScreenshots/{sid}')['data']['attributes'].get('assetDeliveryState') or {}
+            if st.get('state') == 'COMPLETE':
+                del pending[name]
+            elif st.get('state') == 'FAILED':
+                errs = '; '.join(e.get('description') or e.get('code', '') for e in st.get('errors') or [])
+                print(f'   {name} REJECTED: {errs}')
+                failures.append(f'screenshot {name}: {errs}')
+                del pending[name]
+        if not pending:
+            break
+        time.sleep(6)
+    print(f'   {len(uploaded) - len(pending)} of {len(uploaded)} checked by Apple'
+          + (f', {len(pending)} still processing' if pending else ''))
 
 
 @step('App Review information')
