@@ -1,0 +1,44 @@
+{
+  "common": {
+    "bundleId": "com.kousa.mushaf",
+    "version": "1.10.12",
+    "build": "31",
+    "locales": {
+      "ar": "ar-SA",
+      "en": "en-US",
+      "fr": "fr-FR"
+    },
+    "supportUrl": "https://www.mushafapp.com",
+    "marketingUrl": "https://www.mushafapp.com",
+    "privacyPolicyUrl": "https://www.mushafapp.com/privacy.html",
+    "primaryCategory": "REFERENCE",
+    "secondaryCategory": "EDUCATION",
+    "reviewNotes": "Mus'haf is a free Quran reader: the authentic Madinah Mushaf (King Fahd Complex page images), offered as a\ncharitable work (Sadaqa Jariyah). No account, no ads, no data collected.\n\n- Pages, translations, tafsir and recitation audio are downloaded on demand from public sources\n  (raw.githubusercontent.com, api.alquran.cloud, api.quran.com, quranenc.com, everyayah.com) and cached\n  for offline reading; the user can also download all pages at once.\n- Background audio is used for recitation, which continues with the screen locked.\n- A local notification (no server) reminds the user on Fridays to read Surat Al-Kahf; it can be turned off\n  in Settings ▸ Reminders.\n- The opening page is a charitable dedication, customary in Islamic publications."
+  },
+  "locales": {
+    "ar": {
+      "name": "المصحف — مصحف المدينة",
+      "subtitle": "مصحف المدينة مع ٢٦ قارئًا",
+      "promotionalText": "صدقة جارية: مصحف المدينة بصفحاته الأصلية، مع تلاوة آيةً بآية، وترجمة وتفسير، وتذكير الجمعة بسورة الكهف. بدون إعلانات ولا حسابات.",
+      "keywords": "قرآن,مصحف,القرآن الكريم,تلاوة,تفسير,حفظ,ختمة,سورة الكهف,قارئ,المدينة,حفص,اذكار",
+      "whatsNew": "أيقونة جديدة، وتذكير يوم الجمعة بسورة الكهف، وألوان المواضيع، وتحسينات في التصميم.",
+      "description": "مصحف المدينة المنورة الأصلي (طبعة مجمع الملك فهد، برواية حفص، ٦٠٤ صفحات)، صدقةً جارية.\nبدون إعلانات ولا حسابات ولا تتبّع.\n\nاقرأه كما طُبع\n• الصفحات المطبوعة الأصلية بإطار ذهبي وأخضر، ولفظ الجلالة بالأحمر\n• المصحف الكلاسيكي والملوّن والليلي، مع ضبط السطوع\n• القراءة بملء الشاشة: الصفحة وحدها، اضغطها لإظهار الأزرار\n• صفحتان متقابلتان على الآيباد كمصحف مفتوح\n• ألوان المواضيع: كل مقطع من المصحف بلون خاص\n\nاستمع آيةً بآية\n• ٢٦ قارئًا، وصلاح بو خاطر افتراضيًا: عبد الباسط، الحصري، المنشاوي، العفاسي، السديس، الشريم،\n  المعيقلي، الغامدي وغيرهم\n• الآية المتلوّة مظلّلة والصفحة تتبعها\n• كرّر الآية أو نطاقًا كاملًا حتى ∞ للحفظ\n• تستمر التلاوة والشاشة مقفلة\n\nافهم\n• عرض الترجمة والتفسير: السورة آيةً بآية، بالعربية أو الترجمة أو كليهما، مع التفسير\n• ترجمات (صحيح إنترناشونال، حميد الله) وتفاسير (ابن كثير، الميسّر، المختصر)\n• ملاحظات على أي آية، ومشاركة الآية كصورة جميلة\n\nانتقل أينما شئت\n• السور والأجزاء وأرباع الأحزاب الـ٢٤٠ والبحث والعلامات والملاحظات في قائمة جانبية واحدة\n• تابع القراءة أو الاستماع من حيث توقفت\n• تذكير يوم الجمعة بقراءة سورة الكهف\n\nمصحفك دون إنترنت\n• حمّل الصفحات الـ٦٠٤ مرة واحدة واقرأ دون اتصال\n• الواجهة بالعربية والإنجليزية والفرنسية\n\nويمكنك القراءة في المتصفح: www.mushafapp.com"
+    },
+    "en": {
+      "name": "Mus'haf — Madinah Quran",
+      "subtitle": "Madinah Mushaf · 26 reciters",
+      "promotionalText": "A Sadaqa Jariyah: the authentic Madinah Mushaf with verse-by-verse recitation, translation, tafsir and a Friday reminder for Surat Al-Kahf. No ads, no accounts.",
+      "keywords": "quran,mushaf,koran,madinah,recitation,tafsir,hafs,quran offline,memorize,kahf,islam,muslim",
+      "whatsNew": "A new icon, a Friday reminder for Surat Al-Kahf, colours by subject, and design refinements.",
+      "description": "The authentic Madinah Mushaf (King Fahd Complex printing, Hafs narration, 604 pages), offered as an ongoing\ncharity (Sadaqa Jariyah). No ads, no accounts, no tracking.\n\nREAD IT AS IT WAS PRINTED\n• The real printed pages, in a gold-and-green frame, every name of Allah in red\n• Classic, Coloured and Night page styles, with brightness control\n• Full-screen reading: just the page; tap it for the controls\n• Two pages side by side on iPad, like an open mushaf\n• Colours by subject: each passage of the mushaf in its own colour\n\nLISTEN, VERSE BY VERSE\n• 26 reciters, Salah Bukhatir by default: Abdul Basit, Al-Husary, Al-Minshawi, Alafasy, As-Sudais,\n  Ash-Shuraim, Al-Muaiqly, Al-Ghamdi and more\n• The ayah being recited is highlighted and the page follows\n• Repeat each ayah or a whole range, up to ∞, to memorise\n• Recitation continues with the screen locked\n\nUNDERSTAND\n• The Translation & Tafsir view: the surah ayah by ayah, Arabic, translation or both, with tafsir\n• Translations (Saheeh International, Hamidullah) and tafsir (Ibn Kathir, Al-Muyassar, Al-Mukhtasar)\n• Notes on any ayah; share an ayah as a beautiful image\n\nFIND YOUR WAY\n• Surahs, juz' and all 240 hizb quarters, search, ribbon bookmarks and notes, in one side menu\n• Continue reading or listening exactly where you stopped\n• A Friday reminder to read Surat Al-Kahf\n\nYOURS, OFFLINE\n• Download all 604 pages once and read without a connection\n• Arabic, English and French\n\nAlso in your browser at www.mushafapp.com"
+    },
+    "fr": {
+      "name": "Mus'haf — Coran de Médine",
+      "subtitle": "Coran de Médine · 26 récitants",
+      "promotionalText": "Une Sadaqa Jariyah : le Mushaf de Médine authentique, récitation verset par verset, traduction, tafsir et rappel du vendredi pour Al-Kahf. Sans pub ni compte.",
+      "keywords": "coran,mushaf,quran,médine,récitation,tafsir,hafs,hors ligne,mémoriser,kahf,islam,musulman",
+      "whatsNew": "Une nouvelle icône, un rappel du vendredi pour Al-Kahf, les couleurs par thème et des finitions.",
+      "description": "Le Mushaf authentique de Médine (impression du Complexe du Roi Fahd, lecture Hafs, 604 pages), offert en\naumône continue (Sadaqa Jariyah). Sans publicité, sans compte, sans suivi.\n\nLISEZ-LE TEL QU'IMPRIMÉ\n• Les vraies pages imprimées, dans un cadre or et vert, le nom d'Allah en rouge\n• Styles Classique, Coloré et Nuit, avec réglage de la luminosité\n• Lecture plein écran : rien que la page ; touchez-la pour les commandes\n• Double page sur iPad, comme un mushaf ouvert\n• Couleurs par thème : chaque passage du mushaf dans sa couleur\n\nÉCOUTEZ, VERSET PAR VERSET\n• 26 récitateurs, Salah Bukhatir par défaut : Abdul Basit, Al-Husary, Al-Minshawi, Alafasy, As-Sudais,\n  Ash-Shuraim, Al-Muaiqly, Al-Ghamdi et d'autres\n• Le verset récité est surligné et la page suit\n• Répétez un verset ou tout un passage, jusqu'à ∞, pour mémoriser\n• La récitation continue écran verrouillé\n\nCOMPRENEZ\n• La vue Traduction et tafsir : la sourate verset par verset, arabe, traduction ou les deux, avec le tafsir\n• Traductions (Saheeh International, Hamidullah) et tafsirs (Ibn Kathir, Al-Muyassar, Al-Mukhtasar)\n• Notes sur chaque verset ; partagez un verset en belle image\n\nTROUVEZ VOTRE CHEMIN\n• Sourates, juz' et les 240 quarts de hizb, recherche, signets et notes, dans un menu latéral\n• Reprenez la lecture ou l'écoute là où vous vous êtes arrêté\n• Un rappel du vendredi pour lire la sourate Al-Kahf\n\nÀ VOUS, HORS LIGNE\n• Téléchargez les 604 pages une fois et lisez sans connexion\n• Arabe, anglais et français\n\nAussi dans votre navigateur : www.mushafapp.com"
+    }
+  }
+}

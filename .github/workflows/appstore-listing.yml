@@ -1,0 +1,40 @@
+# Fills Mus'haf's App Store listing in App Store Connect (texts in Arabic, English and French, categories, age
+# rating, free price, the version and its build, screenshots for every device, App Review notes), from
+# ios-assets/appstore-metadata/listing.json and ios-assets/appstore-assets/. See ios-assets/appstore_listing.py.
+# Uses the same API key secrets as the App Store workflow. Safe to run again: it updates what is there.
+name: App Store listing
+
+on:
+  workflow_dispatch:
+    inputs:
+      copyright:
+        description: Copyright line, e.g. "2026 Your Name" (empty to leave it as is)
+        required: false
+      submit:
+        description: Also submit the version to App Review
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  listing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pyjwt cryptography requests
+      - name: Fill the listing
+        env:
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          APPSTORE_KEY: ${{ secrets.APPSTORE_KEY }}
+          COPYRIGHT: ${{ inputs.copyright }}
+        run: |
+          args=()
+          [ -n "$COPYRIGHT" ] && args+=(--copyright "$COPYRIGHT")
+          [ "${{ inputs.submit }}" = "true" ] && args+=(--submit)
+          python ios-assets/appstore_listing.py "${args[@]}"
