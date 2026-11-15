@@ -187,7 +187,8 @@ def price(api, app):
 def version(api, app, cfg):
     versions = api.get(f"/v1/apps/{app['id']}/appStoreVersions", **{'filter[platform]': 'IOS', 'limit': 20})['data']
     editable = [v for v in versions if v['attributes']['appStoreState'] in
-                ('PREPARE_FOR_SUBMISSION', 'DEVELOPER_REJECTED', 'REJECTED', 'METADATA_REJECTED')]
+                ('PREPARE_FOR_SUBMISSION', 'DEVELOPER_REJECTED', 'REJECTED', 'METADATA_REJECTED',
+                 'INVALID_BINARY')]
     if editable:
         v = editable[0]
     else:
@@ -321,7 +322,9 @@ def screenshots(api, locs, cfg):
 
 @step('App Review information')
 def review(api, ver, cfg):
-    attrs = {'notes': cfg['reviewNotes'], 'demoAccountRequired': False}
+    video = os.environ.get('REVIEW_VIDEO', '').strip()
+    notes = cfg['reviewNotes'].replace('{video}', video or '(link to follow)')
+    attrs = {'notes': notes, 'demoAccountRequired': False}
     # The App Review contact, from the run's inputs (masked in the logs; never stored in this public repo).
     for k, env in (('contactFirstName', 'REVIEW_FIRST_NAME'), ('contactLastName', 'REVIEW_LAST_NAME'),
                    ('contactEmail', 'REVIEW_EMAIL'), ('contactPhone', 'REVIEW_PHONE')):
@@ -342,11 +345,21 @@ def review(api, ver, cfg):
 
 @step('Submit for review')
 def submit(api, app, ver):
-    sub = api.post('/v1/reviewSubmissions', {'data': {'type': 'reviewSubmissions', 'attributes': {'platform': 'IOS'},
-                                                       'relationships': {'app': rel('apps', app['id'])}}})['data']
-    api.post('/v1/reviewSubmissionItems', {'data': {'type': 'reviewSubmissionItems', 'relationships': {
-        'reviewSubmission': rel('reviewSubmissions', sub['id']),
-        'appStoreVersion': rel('appStoreVersions', ver['id'])}}})
+    # After App Review asks for more, the earlier submission is reopened ("unresolved issues"): resubmit that one.
+    subs = api.get('/v1/reviewSubmissions', **{'filter[app]': app['id'], 'filter[platform]': 'IOS',
+                                                'filter[state]': 'READY_FOR_REVIEW,UNRESOLVED_ISSUES'})['data']
+    if subs:
+        sub = subs[0]
+        print(f"   reusing the submission in state {sub['attributes'].get('state')}")
+    else:
+        sub = api.post('/v1/reviewSubmissions', {'data': {'type': 'reviewSubmissions', 'attributes': {'platform': 'IOS'},
+                                                           'relationships': {'app': rel('apps', app['id'])}}})['data']
+    try:
+        api.post('/v1/reviewSubmissionItems', {'data': {'type': 'reviewSubmissionItems', 'relationships': {
+            'reviewSubmission': rel('reviewSubmissions', sub['id']),
+            'appStoreVersion': rel('appStoreVersions', ver['id'])}}})
+    except ApiError as e:
+        print(f'   (version already in the submission: {e})')
     api.patch(f"/v1/reviewSubmissions/{sub['id']}", {'data': {'type': 'reviewSubmissions', 'id': sub['id'],
                                                                'attributes': {'submitted': True}}})
     print('   submitted to App Review')

@@ -19,6 +19,9 @@ on:
       contact_phone:
         description: App Review contact phone, with + and the country code (masked in the logs)
         required: false
+      video_url:
+        description: Link to the screen recording for App Review (goes in the review notes)
+        required: false
       submit:
         description: Also submit the version to App Review
         type: boolean
@@ -56,6 +59,7 @@ jobs:
             export REVIEW_FIRST_NAME="${name%% *}" REVIEW_LAST_NAME="${name#* }"
           fi
           export REVIEW_EMAIL=$(jq -r '.inputs.contact_email // empty' "$GITHUB_EVENT_PATH")
+          export REVIEW_VIDEO=$(jq -r '.inputs.video_url // empty' "$GITHUB_EVENT_PATH")
           export REVIEW_PHONE=$(jq -r '.inputs.contact_phone // empty' "$GITHUB_EVENT_PATH")
           args=()
           [ -n "$COPYRIGHT" ] && args+=(--copyright "$COPYRIGHT")
