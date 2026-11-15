@@ -397,7 +397,13 @@ Future<void> _appleImages(WidgetTester tester, _Pump pumpApp, _Capture capture, 
     model.update(() => model.mode = ReadingMode.mushaf);
   }
 
-  for (final (prefix, size, ratio) in [('iphone', const Size(440, 956), 3.0), ('ipad', const Size(1376, 1032), 2.0)]) {
+  for (final (prefix, size, ratio) in [
+    ('iphone', const Size(440, 956), 3.0),
+    ('ipad', const Size(1376, 1032), 2.0),
+    // iPhone Duo (App Store sizes 1398 × 2034 folded, 2853 × 2007 unfolded).
+    ('duo-outer', const Size(466, 678), 3.0),
+    ('duo-inner', const Size(951, 669), 3.0),
+  ]) {
     await pumpApp(tester, size);
     model.library.toggleBookmark(1, title: model.pageTitle(1));
     model.update(() {});
@@ -428,7 +434,8 @@ Future<void> _appleImages(WidgetTester tester, _Pump pumpApp, _Capture capture, 
       await capture('$prefix-fullscreen', ratio);
       await done();
     }
-    await pumpApp(tester, size, dark: true, saved: {'theme': 'night', 'lastPage': prefix == 'ipad' ? 1 : 2});
+    final spread = prefix == 'ipad' || prefix == 'duo-inner';
+    await pumpApp(tester, size, dark: true, saved: {'theme': 'night', 'lastPage': spread ? 1 : 2});
     await capture('$prefix-night', ratio);
     await done();
   }
@@ -441,6 +448,27 @@ Future<void> _appleImages(WidgetTester tester, _Pump pumpApp, _Capture capture, 
     await compose('iphone', '${++n}-$key', const Size(1080, 1080 * 2868 / 1320),
         _Poster(caption: _caption(key), child: _Phone(shot, width: 780)),
         ratio: 1320 / 1080);
+  }
+  // iPhone Duo folded: 1398 × 2034, composed at 1080 wide.
+  n = 0;
+  for (final key in ['mushaf', 'recitation', 'repeat', 'translation', 'night']) {
+    final shot = shots['duo-outer-$key'];
+    if (shot == null) continue;
+    await compose('iphone-duo-outer', '${++n}-$key', const Size(1080, 1080 * 2034 / 1398),
+        _Poster(caption: _caption(key), child: _Phone(shot, width: 720)),
+        ratio: 1398 / 1080);
+  }
+  // iPhone Duo unfolded: 2853 × 2007 landscape, the caption beside the open phone.
+  n = 0;
+  for (final key in ['mushaf', 'recitation', 'translation', 'repeat', 'night']) {
+    final shot = shots['duo-inner-$key'];
+    if (shot == null) continue;
+    await compose('iphone-duo-inner', '${++n}-$key', const Size(2560, 2560 * 2007 / 2853),
+        _Poster(
+            caption: _caption(key),
+            wide: true,
+            child: SizedBox(width: 1560, height: 1300, child: FittedBox(child: _Tablet(shot, width: 1500)))),
+        ratio: 2853 / 2560);
   }
   // iPad: 2064 × 2752, the landscape iPad under the caption.
   n = 0;

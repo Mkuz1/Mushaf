@@ -180,16 +180,20 @@ jobs:
   # the user's own Apple ID when installing (see ios-assets/SIDELOAD.md).
   ios:
     needs: version
-    runs-on: macos-15
+    # GitHub's Xcode 27 image (Apple silicon), for the iOS 27.1 SDK (iPhone Duo).
+    runs-on: xcode-27
     defaults:
       run:
         working-directory: flutter_app
     steps:
       - uses: actions/checkout@v4
-      - name: Xcode 26
-        # macos-15 runners (far more of them than macos-26) carry Xcode 26, which has the macOS 26 SDK.
+      - name: Xcode 27.1 or later
+        # Built with the iOS 27.1 SDK, the app fills iPhone Duo's displays (with an older SDK it runs in a window
+        # in the middle of the unfolded display).
         run: |
-          sudo xcode-select -s "$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)"
+          x=$(ls -d /Applications/Xcode_27.*.app 2>/dev/null | grep -E 'Xcode_27\.[1-9]' | sort -V | tail -1)
+          if [ -z "$x" ]; then echo "::error::No Xcode 27.1 or later on this runner"; ls -d /Applications/Xcode*.app; exit 1; fi
+          sudo xcode-select -s "$x"
           xcodebuild -version
       - uses: subosito/flutter-action@v2
         with:

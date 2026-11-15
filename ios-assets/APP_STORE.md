@@ -9,7 +9,8 @@ Developer account, the upload (done by GitHub Actions, no Mac needed), and every
 
 | Item | Where |
 |---|---|
-| App | `flutter_app/` — the same Flutter app as on every other platform, iPhone and iPad (iOS 15+) |
+| App | `flutter_app/` — the same Flutter app as on every other platform, iPhone, iPad and iPhone Duo (iOS 15+) |
+| iPhone Duo | Built with **Xcode 27.1 (iOS 27.1 SDK)** on GitHub's `xcode-27` runner, so the app fills both of iPhone Duo's displays: one page folded, the two-page spread unfolded, the same place when folding, clear of the side status bar. A test checks this at Apple's sizes. |
 | Bundle ID | `com.kousa.mushaf` |
 | Version | `version:` in `flutter_app/pubspec.yaml` (1.10.12, build 31) |
 | App icon | `flutter_app/ios/Runner/Assets.xcassets/AppIcon.appiconset/icon-1024.png` |
@@ -18,7 +19,7 @@ Developer account, the upload (done by GitHub Actions, no Mac needed), and every
 | Background audio | `UIBackgroundModes: audio` — recitation keeps playing with the screen locked |
 | App Store build | `--dart-define=APPSTORE=true` hides the other platforms' downloads and the GitHub update checks (the App Store updates the app) |
 | Upload | `.github/workflows/appstore.yml` — builds, signs and uploads to App Store Connect |
-| Screenshots | `appstore-assets/iphone-6.9/` and `appstore-assets/ipad-13/`, in `ar`, `en`, `fr` |
+| Screenshots | `appstore-assets/iphone-6.9/`, `iphone-duo-outer/`, `iphone-duo-inner/` and `ipad-13/`, in `ar`, `en`, `fr` |
 | Privacy policy | https://www.mushafapp.com/privacy.html |
 
 ---
@@ -253,9 +254,15 @@ Upload in App Store Connect ▸ the version page ▸ **Previews and Screenshots*
 | Device size in App Store Connect | Folder | Files |
 |---|---|---|
 | **iPhone 6.9" Display** (1320 × 2868) | `appstore-assets/iphone-6.9/<lang>/` | 7 (Arabic: 6), in order |
+| **iPhone Duo — outer display** (1398 × 2034) | `appstore-assets/iphone-duo-outer/<lang>/` | 5 (Arabic: 4), in order |
+| **iPhone Duo — inner display** (2853 × 2007) | `appstore-assets/iphone-duo-inner/<lang>/` | 5 (Arabic: 4), in order |
 | **iPad 13" Display** (2064 × 2752) | `appstore-assets/ipad-13/<lang>/` | 5 (Arabic: 4), in order |
 
 Apple scales these down for the smaller iPhone and iPad sizes. The first three are what people see in search.
+
+**iPhone Duo:** App Store Connect has no checkbox for it: support comes from building with the iOS 27.1 SDK
+(done by the workflow). Adding the two iPhone Duo screenshot sets shows a **"made for iPhone Duo" badge** on
+the product page; Apple makes them required for apps built with the iOS 27.1 SDK from April 2027.
 To make them again: `flutter test test/marketing_shots_test.dart --dart-define=STORE=apple
 --dart-define=OUT=<folder> --dart-define=LANG=en --dart-define=PHONE_FONTS=<fonts>` (and `ar`, `fr`).
 

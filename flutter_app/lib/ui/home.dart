@@ -421,8 +421,9 @@ class _HomeState extends State<Home> {
           ),
         ),
         Positioned(
-          left: 10,
-          right: 10,
+          // Clear of the status bar and rounded corners at the sides too (iPhone Duo's inner display, landscape).
+          left: 10 + mq.padding.left,
+          right: 10 + mq.padding.right,
           bottom: 10 + mq.padding.bottom,
           child: overlay(
             top: false,
@@ -482,8 +483,8 @@ class _HomeState extends State<Home> {
         Positioned.fill(child: reader),
         if (hFold == null && !dockInSidebar)
           Positioned(
-            left: 10,
-            right: 10,
+            left: 10 + mq.padding.left,
+            right: 10 + mq.padding.right,
             bottom: 10 + mq.padding.bottom,
             child: Center(
               child: ConstrainedBox(
