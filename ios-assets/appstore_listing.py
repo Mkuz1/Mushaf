@@ -313,6 +313,11 @@ def screenshots(api, locs, cfg):
 @step('App Review information')
 def review(api, ver, cfg):
     attrs = {'notes': cfg['reviewNotes'], 'demoAccountRequired': False}
+    # The App Review contact, from the run's inputs (masked in the logs; never stored in this public repo).
+    for k, env in (('contactFirstName', 'REVIEW_FIRST_NAME'), ('contactLastName', 'REVIEW_LAST_NAME'),
+                   ('contactEmail', 'REVIEW_EMAIL'), ('contactPhone', 'REVIEW_PHONE')):
+        if os.environ.get(env):
+            attrs[k] = os.environ[env].strip()
     try:
         d = api.get(f"/v1/appStoreVersions/{ver['id']}/appStoreReviewDetail")['data']
     except ApiError:
@@ -323,7 +328,7 @@ def review(api, ver, cfg):
     else:
         api.post('/v1/appStoreReviewDetails', {'data': {'type': 'appStoreReviewDetails', 'attributes': attrs,
                                                          'relationships': {'appStoreVersion': rel('appStoreVersions', ver['id'])}}})
-    print('   notes set (contact name, phone and email: fill them in App Store Connect)')
+    print('   notes and contact set')
 
 
 @step('Submit for review')
