@@ -46,8 +46,43 @@ def main():
         except ApiError as e:
             msg = str(e).replace(a['username'], '<email>')
             print(f'{who}: {msg}')
-    print(f'{added} tester(s) added. They get an email from TestFlight; the build is in the TestFlight app.')
-    sys.exit(0 if added or users else 1)
+    print(f'{added} tester(s) added.')
+
+    # The latest builds: in the group, and their internal-testing state.
+    builds = api.get('/v1/builds', **{'filter[app]': app['id'], 'sort': '-uploadedDate', 'limit': 3,
+                                       'include': 'buildBetaDetail'})
+    details = {d['id']: d['attributes'] for d in builds.get('included', []) if d['type'] == 'buildBetaDetails'}
+    for b in builds['data']:
+        d = details.get(b['relationships']['buildBetaDetail']['data']['id'], {})
+        print(f"Build {b['attributes']['version']}: {b['attributes'].get('processingState')}, "
+              f"expired={b['attributes'].get('expired')}, internal={d.get('internalBuildState')}, "
+              f"external={d.get('externalBuildState')}, "
+              f"encryption answered={b['attributes'].get('usesNonExemptEncryption')}")
+        try:
+            api.post(f"/v1/betaGroups/{group['id']}/relationships/builds",
+                     {'data': [{'type': 'builds', 'id': b['id']}]})
+            print('   added to the internal group')
+        except ApiError as e:
+            print(f'   adding to the group: {e}')
+        if b['attributes'].get('usesNonExemptEncryption') is None:
+            try:
+                api.patch(f"/v1/builds/{b['id']}", {'data': {'type': 'builds', 'id': b['id'],
+                                                             'attributes': {'usesNonExemptEncryption': False}}})
+                print('   encryption question answered: no')
+            except ApiError as e:
+                print(f'   encryption question: {e}')
+
+    # The testers: their state, and a new invitation.
+    for t in api.get(f"/v1/betaGroups/{group['id']}/betaTesters", limit=50)['data']:
+        a = t['attributes']
+        print(f"Tester {a.get('firstName', '')}: invite {a.get('inviteType')}, state {a.get('state')}")
+        try:
+            api.post('/v1/betaTesterInvitations', {'data': {'type': 'betaTesterInvitations', 'relationships': {
+                'app': rel('apps', app['id']), 'betaTester': rel('betaTesters', t['id'])}}})
+            print('   invitation sent again')
+        except ApiError as e:
+            print(f"   invitation: {str(e).replace(a.get('email') or '@@', '<email>')}")
+    sys.exit(0)
 
 
 if __name__ == '__main__':
