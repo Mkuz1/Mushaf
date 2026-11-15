@@ -130,6 +130,15 @@ def app_info(api, app, cfg, meta):
     return info
 
 
+@step('Content rights: uses third-party content (with the rights to it)')
+def content_rights(api, app):
+    # The Madinah Mushaf pages, the reciters' recordings, the tafsir and the translations are third-party
+    # content, all shared freely for this use.
+    api.patch(f"/v1/apps/{app['id']}", {'data': {'type': 'apps', 'id': app['id'], 'attributes': {
+        'contentRightsDeclaration': 'USES_THIRD_PARTY_CONTENT'}}})
+    print('   set')
+
+
 @step('Age rating (4+: none of the content)')
 def age_rating(api, info):
     decl = api.get(f"/v1/appInfos/{info['id']}/ageRatingDeclaration")['data']
@@ -357,6 +366,7 @@ def main():
     if not app:
         sys.exit(1)
     info = app_info(api, app, cfg, meta)
+    content_rights(api, app)
     if info:
         age_rating(api, info)
     price(api, app)
