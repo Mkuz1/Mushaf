@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../update/update_checker.dart';
 import '../core/friday_reminder.dart';
 import '../app_model.dart';
 import '../core/l10n.dart';
@@ -223,32 +224,35 @@ class _Settings extends StatelessWidget {
                 title: Text(tr('Import Notes & Bookmarks…')),
                 onTap: () => _import(context),
               ),
-              section(tr('Download Mus\'haf')),
-              for (final (icon, label, url) in [
-                (Icons.android, 'Android (APK)', Remote.latestDownload('Mushaf-Android.apk')),
-                (Icons.shop_outlined, 'Google Play', Remote.playStore),
-                (Icons.desktop_windows_outlined, 'Windows (installer)', Remote.latestDownload('Mushaf-Windows-Setup.exe')),
-                (Icons.folder_zip_outlined, 'Windows (portable)', Remote.latestDownload('Mushaf-Windows-Portable.zip')),
-                (Icons.laptop_mac, 'macOS', Remote.latestDownload('Mushaf-macOS.dmg')),
-                (Icons.phone_iphone, 'iPhone & iPad', Remote.iphone),
-                (Icons.language, 'Web reader', Remote.webReader),
-                (Icons.open_in_new, 'All releases on GitHub', Remote.releasesPage),
-              ])
-                ListTile(
-                  leading: Icon(icon),
-                  title: Text(tr(label)),
-                  onTap: () => launchUrl(url, mode: LaunchMode.externalApplication),
-                ),
+              if (!appStoreBuild) ...[
+                section(tr('Download Mus\'haf')),
+                for (final (icon, label, url) in [
+                  (Icons.android, 'Android (APK)', Remote.latestDownload('Mushaf-Android.apk')),
+                  (Icons.shop_outlined, 'Google Play', Remote.playStore),
+                  (Icons.desktop_windows_outlined, 'Windows (installer)', Remote.latestDownload('Mushaf-Windows-Setup.exe')),
+                  (Icons.folder_zip_outlined, 'Windows (portable)', Remote.latestDownload('Mushaf-Windows-Portable.zip')),
+                  (Icons.laptop_mac, 'macOS', Remote.latestDownload('Mushaf-macOS.dmg')),
+                  (Icons.phone_iphone, 'iPhone & iPad', Remote.iphone),
+                  (Icons.language, 'Web reader', Remote.webReader),
+                  (Icons.open_in_new, 'All releases on GitHub', Remote.releasesPage),
+                ])
+                  ListTile(
+                    leading: Icon(icon),
+                    title: Text(tr(label)),
+                    onTap: () => launchUrl(url, mode: LaunchMode.externalApplication),
+                  ),
+              ],
               section(tr('About')),
-              ListTile(
-                leading: const Icon(Icons.system_update_alt),
-                title: Text(tr('Check for Updates')),
-                subtitle: Text(_updateStatus()),
-                trailing: model.updates.checking
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : null,
-                onTap: () => model.updates.check(manual: true),
-              ),
+              if (!appStoreBuild)
+                ListTile(
+                  leading: const Icon(Icons.system_update_alt),
+                  title: Text(tr('Check for Updates')),
+                  subtitle: Text(_updateStatus()),
+                  trailing: model.updates.checking
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : null,
+                  onTap: () => model.updates.check(manual: true),
+                ),
               ListTile(
                 leading: const Icon(Icons.help_outline),
                 title: Text(tr('Mushaf Help')),

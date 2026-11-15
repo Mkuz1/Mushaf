@@ -29,6 +29,10 @@ import 'screenshot_surahs.dart';
 const out = String.fromEnvironment('OUT');
 const language = String.fromEnvironment('LANG', defaultValue: 'en');
 const _phoneFonts = String.fromEnvironment('PHONE_FONTS');
+
+/// `--dart-define=STORE=apple`: App Store screenshots instead (iphone/ 1320 × 2868 for the 6.9" iPhone,
+/// ipad/ 2064 × 2752 for the 13" iPad), without the Android-only devices, as Apple's guidelines ask.
+const _apple = String.fromEnvironment('STORE') == 'apple';
 final _screen = GlobalKey();
 final _arabic = language == 'ar';
 
@@ -203,13 +207,41 @@ void main() {
         final boundary = _screen.currentContext!.findRenderObject()! as RenderRepaintBoundary;
         shots[name] = await boundary.toImage(pixelRatio: ratio);
       });
-      debugPrint('captured $name');
+      debugPrint('captured $name ${shots[name]!.width}x${shots[name]!.height}');
     }
 
     Future<void> done() async {
       await tester.pump(const Duration(seconds: 4));
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 200)));
       await tester.pumpWidget(const SizedBox());
+    }
+
+    // Composed images.
+    Future<void> compose(String folder, String name, Size size, Widget child, {double ratio = 1}) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      tester.view.displayFeatures = const [];
+      await tester.pumpWidget(RepaintBoundary(
+        key: _screen,
+        child: Directionality(
+          textDirection: _arabic ? TextDirection.rtl : TextDirection.ltr,
+          child: MediaQuery(data: MediaQueryData(size: size), child: child),
+        ),
+      ));
+      await tester.pump();
+      await tester.runAsync(() async {
+        final boundary = _screen.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+        final image = await boundary.toImage(pixelRatio: ratio);
+        final png = await image.toByteData(format: ui.ImageByteFormat.png);
+        final dir = Directory('$out/$language/$folder')..createSync(recursive: true);
+        File('${dir.path}/$name.png').writeAsBytesSync(png!.buffer.asUint8List());
+      });
+    }
+
+
+    if (_apple) {
+      await _appleImages(tester, pumpApp, capture, done, compose, shots);
+      return;
     }
 
     const phone = Size(412, 892), phoneRatio = 2.625;
@@ -307,28 +339,6 @@ void main() {
     await capture('tv-night', tvRatio);
     await done();
 
-    // Composed images.
-    Future<void> compose(String folder, String name, Size size, Widget child) async {
-      tester.view.physicalSize = size;
-      tester.view.devicePixelRatio = 1;
-      tester.view.displayFeatures = const [];
-      await tester.pumpWidget(RepaintBoundary(
-        key: _screen,
-        child: Directionality(
-          textDirection: _arabic ? TextDirection.rtl : TextDirection.ltr,
-          child: MediaQuery(data: MediaQueryData(size: size), child: child),
-        ),
-      ));
-      await tester.pump();
-      await tester.runAsync(() async {
-        final boundary = _screen.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-        final image = await boundary.toImage();
-        final png = await image.toByteData(format: ui.ImageByteFormat.png);
-        final dir = Directory('$out/$language/$folder')..createSync(recursive: true);
-        File('${dir.path}/$name.png').writeAsBytesSync(png!.buffer.asUint8List());
-      });
-    }
-
     const portrait = Size(1080, 1920);
     var n = 0;
     for (final key in ['mushaf', 'recitation', 'repeat', 'translation', 'index', 'fullscreen', 'night']) {
@@ -355,6 +365,121 @@ void main() {
           RawImage(image: shots[key], fit: BoxFit.fill, width: 1920, height: 1080));
     }
   });
+}
+
+typedef _Pump = Future<void> Function(WidgetTester tester, Size size,
+    {Map<String, Object> saved, bool dark, List<ui.DisplayFeature> features});
+typedef _Capture = Future<void> Function(String name, double ratio);
+typedef _Compose = Future<void> Function(String folder, String name, Size size, Widget child, {double ratio});
+
+/// The App Store set: the app on an iPhone 16 Pro Max (440 × 956 points at 3×) and a 13" iPad in landscape
+/// (1376 × 1032 at 2×, the side menu beside the spread), captioned at Apple's pixel sizes.
+Future<void> _appleImages(WidgetTester tester, _Pump pumpApp, _Capture capture, Future<void> Function() done, _Compose compose,
+    Map<String, ui.Image> shots) async {
+  Future<void> recite(AyahKey k) async {
+    model.select(k);
+    model.audio
+      ..current = k
+      ..isPlaying = true
+      ..changed();
+  }
+
+  Future<void> translationView(AyahKey selected, String name, double ratio) async {
+    if (!_fatiha.containsKey(language)) return;
+    model.goTo(1);
+    model.text.texts[model.translationID] = [_fatiha[language]!];
+    model.update(() {
+      model.studyDisplay = StudyDisplay.translation;
+      model.mode = ReadingMode.text;
+    });
+    model.select(selected);
+    await capture(name, ratio);
+    model.update(() => model.mode = ReadingMode.mushaf);
+  }
+
+  for (final (prefix, size, ratio) in [('iphone', const Size(440, 956), 3.0), ('ipad', const Size(1376, 1032), 2.0)]) {
+    await pumpApp(tester, size);
+    model.library.toggleBookmark(1, title: model.pageTitle(1));
+    model.update(() {});
+    await capture('$prefix-mushaf', ratio);
+    await done();
+    await pumpApp(tester, size, saved: {'lastPage': 2});
+    await recite(const AyahKey(2, 3));
+    await capture('$prefix-recitation', ratio);
+    showAudioOptions(tester.element(find.byType(Home)));
+    await capture('$prefix-repeat', ratio);
+    Navigator.of(tester.element(find.text(tr('Done')))).pop();
+    model.audio.stop();
+    model.select(null);
+    await settle(tester);
+    if (prefix == 'iphone') {
+      tester.state<ScaffoldState>(find.byType(Scaffold).first).openDrawer();
+      await capture('$prefix-index', ratio);
+      tester.state<ScaffoldState>(find.byType(Scaffold).first).closeDrawer();
+      await settle(tester);
+    }
+    await translationView(const AyahKey(1, 5), '$prefix-translation', ratio);
+    await done();
+    if (prefix == 'iphone') {
+      await pumpApp(tester, size, saved: {'fullScreen': true, 'lastPage': 1});
+      await tester.tapAt(Offset(size.width / 2, size.height / 2));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 300));
+      await capture('$prefix-fullscreen', ratio);
+      await done();
+    }
+    await pumpApp(tester, size, dark: true, saved: {'theme': 'night', 'lastPage': prefix == 'ipad' ? 1 : 2});
+    await capture('$prefix-night', ratio);
+    await done();
+  }
+
+  // iPhone: 1320 × 2868, composed at 1080 wide.
+  var n = 0;
+  for (final key in ['mushaf', 'recitation', 'repeat', 'translation', 'index', 'fullscreen', 'night']) {
+    final shot = shots['iphone-$key'];
+    if (shot == null) continue;
+    await compose('iphone', '${++n}-$key', const Size(1080, 1080 * 2868 / 1320),
+        _Poster(caption: _caption(key), child: _Phone(shot, width: 780)),
+        ratio: 1320 / 1080);
+  }
+  // iPad: 2064 × 2752, the landscape iPad under the caption.
+  n = 0;
+  for (final key in ['mushaf', 'recitation', 'translation', 'repeat', 'night']) {
+    final shot = shots['ipad-$key'];
+    if (shot == null) continue;
+    await compose('ipad', '${++n}-$key', const Size(1080, 1440),
+        // Fitted into the room under the caption, whatever the caption's height.
+        _Poster(
+            caption: _caption(key),
+            child: SizedBox(width: 1000, height: 820, child: FittedBox(child: _Tablet(shot, width: 1000)))),
+        ratio: 2064 / 1080);
+  }
+}
+
+/// An iPad in landscape: an even black bezel with rounded corners.
+class _Tablet extends StatelessWidget {
+  final ui.Image screen;
+  final double width;
+  const _Tablet(this.screen, {required this.width});
+
+  @override
+  Widget build(BuildContext context) {
+    final inner = width - 36;
+    return Container(
+      width: width,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0D0D0D),
+        borderRadius: BorderRadius.circular(46),
+        border: Border.all(color: const Color(0xFF3B3B3B), width: 3),
+        boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 40, offset: Offset(0, 18))],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: RawImage(image: screen, width: inner, height: inner * screen.height / screen.width, fit: BoxFit.fill),
+      ),
+    );
+  }
 }
 
 /// The caption over a device on Mus'haf's dark green, in portrait (phone) or landscape (tablet).
