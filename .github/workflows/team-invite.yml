@@ -1,0 +1,42 @@
+# Invites someone to the App Store Connect team (Developer role) so they can be an internal TestFlight tester.
+# The address is read from the event file and masked: this repository's run logs are public.
+name: App Store Connect team invite
+
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: Email to invite (masked in the logs)
+        required: true
+      name:
+        description: First and last name (masked in the logs)
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  invite:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mask
+        run: |
+          for k in email name; do
+            v=$(jq -r ".inputs.$k // empty" "$GITHUB_EVENT_PATH")
+            for p in "$v" $v; do [ -n "$p" ] && echo "::add-mask::$p"; done
+          done; true
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pyjwt cryptography requests
+      - name: Invite
+        working-directory: ios-assets
+        env:
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          APPSTORE_KEY: ${{ secrets.APPSTORE_KEY }}
+        run: |
+          export INVITE_EMAIL=$(jq -r '.inputs.email // empty' "$GITHUB_EVENT_PATH")
+          export INVITE_NAME=$(jq -r '.inputs.name // empty' "$GITHUB_EVENT_PATH")
+          python team_invite.py
