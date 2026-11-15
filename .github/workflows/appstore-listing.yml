@@ -10,6 +10,15 @@ on:
       copyright:
         description: Copyright line, e.g. "2026 Your Name" (empty to leave it as is)
         required: false
+      contact_name:
+        description: App Review contact, first and last name (masked in the logs)
+        required: false
+      contact_email:
+        description: App Review contact email (masked in the logs)
+        required: false
+      contact_phone:
+        description: App Review contact phone, with + and the country code (masked in the logs)
+        required: false
       submit:
         description: Also submit the version to App Review
         type: boolean
@@ -22,6 +31,14 @@ jobs:
   listing:
     runs-on: ubuntu-latest
     steps:
+      - name: Mask the contact details
+        # This repository's run logs are public: the contact details are read from the event file (a step's env
+        # and script are printed in its log) and masked before anything could print them.
+        run: |
+          for k in contact_name contact_email contact_phone; do
+            v=$(jq -r ".inputs.$k // empty" "$GITHUB_EVENT_PATH")
+            for p in "$v" $v; do [ -n "$p" ] && echo "::add-mask::$p"; done
+          done; true
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -34,6 +51,12 @@ jobs:
           APPSTORE_KEY: ${{ secrets.APPSTORE_KEY }}
           COPYRIGHT: ${{ inputs.copyright }}
         run: |
+          name=$(jq -r '.inputs.contact_name // empty' "$GITHUB_EVENT_PATH")
+          if [ -n "$name" ]; then
+            export REVIEW_FIRST_NAME="${name%% *}" REVIEW_LAST_NAME="${name#* }"
+          fi
+          export REVIEW_EMAIL=$(jq -r '.inputs.contact_email // empty' "$GITHUB_EVENT_PATH")
+          export REVIEW_PHONE=$(jq -r '.inputs.contact_phone // empty' "$GITHUB_EVENT_PATH")
           args=()
           [ -n "$COPYRIGHT" ] && args+=(--copyright "$COPYRIGHT")
           [ "${{ inputs.submit }}" = "true" ] && args+=(--submit)
