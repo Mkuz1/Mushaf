@@ -803,32 +803,41 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('iPhone Fold: one page folded, the spread unfolded, the same place across folding', (tester) async {
-    // Reported sizes (not yet confirmed by Apple), in points at 3×: outer 474 × 696, inner 904 × 640 (landscape).
-    const folded = Size(474, 696), unfolded = Size(904, 640);
+  testWidgets('iPhone Duo: one page folded, the spread unfolded, the same place across folding', (tester) async {
+    // Apple's App Store screenshot sizes for iPhone Duo at 3×: outer 1398 × 2034 px, inner 2853 × 2007 px.
+    const folded = Size(466, 678), unfolded = Size(951, 669);
     await pumpHome(tester, folded, meta: true, saved: {'lastPage': 2});
     expect(model.effectiveDual, isFalse);
     expect(model.visiblePages(), [2]);
     model.select(const AyahKey(2, 3));
-    await shot(tester, 'iphone-fold-outer');
-    // Unfolding resizes the window while the app runs: the spread with page 2 in it, the ayah still selected.
+    await shot(tester, 'iphone-duo-outer');
+    // Unfolding resizes the window while the app runs. Built with the iOS 27.1 SDK, the app fills the inner
+    // display, with the status bar along its right edge: the spread with page 2, the ayah still selected, and
+    // nothing under the status bar.
     tester.view.physicalSize = unfolded;
+    tester.view.padding = const FakeViewPadding(right: 54);
+    tester.view.viewPadding = const FakeViewPadding(right: 54);
     await tester.pumpAndSettle();
     expect(model.effectiveDual, isTrue);
     expect(model.visiblePages(), contains(2));
     expect(model.selected, const AyahKey(2, 3));
     expect(tester.takeException(), isNull);
-    await shot(tester, 'iphone-fold-inner');
+    for (final tip in [tr('Settings'), tr('Bookmark this page'), tr('Reciter, scope and repeat')]) {
+      expect(tester.getRect(find.byTooltip(tip).first).right, lessThanOrEqualTo(unfolded.width - 54));
+    }
+    await shot(tester, 'iphone-duo-inner');
     // Turning the page while unfolded, then folding: the single page shown is the one being read.
     model.goTo(42);
     await tester.pumpAndSettle();
     tester.view.physicalSize = folded;
+    tester.view.padding = FakeViewPadding.zero;
+    tester.view.viewPadding = FakeViewPadding.zero;
     await tester.pumpAndSettle();
     expect(model.effectiveDual, isFalse);
     expect(model.page, 42);
     expect(model.visiblePages(), [42]);
-    // Held upright while unfolded (taller than wide): one large page.
-    tester.view.physicalSize = const Size(640, 904);
+    // The inner display held the other way (taller than wide): one large page.
+    tester.view.physicalSize = const Size(669, 951);
     await tester.pumpAndSettle();
     expect(model.effectiveDual, isFalse);
     expect(model.page, 42);
