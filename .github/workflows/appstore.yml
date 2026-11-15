@@ -1,0 +1,93 @@
+# Builds Mus'haf for iPhone and iPad, signs it for the App Store and uploads it to App Store Connect,
+# where it appears under TestFlight (about 15 minutes later) and can be submitted for review.
+# Run it from the Actions tab (App Store ▸ Run workflow) once the release is ready.
+#
+# Signing is automatic, with an App Store Connect API key (no Apple ID password, no certificates to export):
+# Xcode creates or reuses the distribution certificate and the provisioning profile for com.kousa.mushaf.
+# Repository secrets (Settings ▸ Secrets and variables ▸ Actions), see ios-assets/APP_STORE.md:
+#   APPSTORE_KEY_ID      the API key's Key ID
+#   APPSTORE_ISSUER_ID   the Issuer ID shown above the keys list
+#   APPSTORE_KEY         the contents of the downloaded AuthKey_<KeyID>.p8 file
+#   APPLE_TEAM_ID        the 10-character Team ID (Membership details)
+name: App Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: Build number (higher than any build uploaded before; empty for pubspec.yaml's)
+        required: false
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: 3.47.7
+
+jobs:
+  upload:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: flutter_app
+    steps:
+      - uses: actions/checkout@v4
+      - name: App Store Connect secrets
+        env:
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          ISSUER: ${{ secrets.APPSTORE_ISSUER_ID }}
+          KEY: ${{ secrets.APPSTORE_KEY }}
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          missing=""
+          for n in KEY_ID ISSUER KEY TEAM; do [ -n "${!n}" ] || missing="$missing $n"; done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing secrets:$missing (APPSTORE_KEY_ID, APPSTORE_ISSUER_ID, APPSTORE_KEY, APPLE_TEAM_ID)"; exit 1
+          fi
+      - name: Xcode 26
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)"
+          xcodebuild -version
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Flutter build
+        run: |
+          build="${{ inputs.build_number }}"
+          # APPSTORE=true: no GitHub update checks or other platforms' downloads in the App Store app. Flutter
+          # writes it into Generated.xcconfig, so the Xcode archive below builds the same way.
+          flutter build ios --release --no-codesign --dart-define=APPSTORE=true ${build:+--build-number=$build}
+      - name: Archive, sign and upload
+        env:
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          ISSUER: ${{ secrets.APPSTORE_ISSUER_ID }}
+          KEY: ${{ secrets.APPSTORE_KEY }}
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          key="$RUNNER_TEMP/AuthKey.p8"
+          printf '%s\n' "$KEY" > "$key"
+          auth=(-allowProvisioningUpdates -authenticationKeyPath "$key"
+                -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER")
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            DEVELOPMENT_TEAM="$TEAM" CODE_SIGN_STYLE=Automatic "${auth[@]}" archive
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$TEAM</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          PLIST
+          # destination=upload: the export sends the signed build straight to App Store Connect.
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" "${auth[@]}"
+          rm -f "$key"
+          echo "Uploaded. The build appears in App Store Connect ▸ TestFlight after processing (about 15 minutes)." >> "$GITHUB_STEP_SUMMARY"

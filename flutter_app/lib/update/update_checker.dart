@@ -8,6 +8,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/storage.dart';
 
+/// Built for Apple's App Store (`--dart-define=APPSTORE=true`, see .github/workflows/appstore.yml): the App
+/// Store delivers updates, so the app neither checks GitHub for them nor offers other platforms' downloads.
+const appStoreBuild = bool.fromEnvironment('APPSTORE');
+
 class AppUpdate {
   final String version;
   final String notes;
@@ -73,7 +77,7 @@ class UpdateChecker extends ChangeNotifier {
               : '.dmg';
 
   Future<void> check({bool manual = false}) async {
-    if (checking) return;
+    if (checking || appStoreBuild) return;
     if (currentVersion.isEmpty) await loadVersion();
     final last = _prefs.getInt('lastUpdateCheck') ?? 0;
     final now = DateTime.now().millisecondsSinceEpoch;
