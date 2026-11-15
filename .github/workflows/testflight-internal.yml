@@ -1,0 +1,26 @@
+# Creates an internal TestFlight group for Mus'haf (every build, no Beta App Review) and adds the team's
+# App Store Connect users, the account holder first. See ios-assets/testflight_internal.py.
+name: TestFlight internal testers
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  testers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pyjwt cryptography requests
+      - name: Internal group and testers
+        working-directory: ios-assets
+        env:
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          APPSTORE_KEY: ${{ secrets.APPSTORE_KEY }}
+        run: python testflight_internal.py
