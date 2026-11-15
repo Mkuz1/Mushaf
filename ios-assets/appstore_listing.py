@@ -65,6 +65,11 @@ class ApiError(Exception):
         try:
             errs = r.json().get('errors', [])
             detail = '; '.join(f"{e.get('title')}: {e.get('detail')}" for e in errs) or r.text[:500]
+            # Apple puts the reasons a submission is refused in meta.associatedErrors.
+            assoc = [f"{x.get('code')}: {x.get('detail') or x.get('title')}"
+                     for e in errs for v in ((e.get('meta') or {}).get('associatedErrors') or {}).values() for x in v]
+            if assoc:
+                detail += ' | ' + ' | '.join(assoc)
         except ValueError:
             detail = r.text[:500]
         super().__init__(f'{method} {path} -> {r.status_code}: {detail}')
@@ -345,23 +350,44 @@ def review(api, ver, cfg):
 
 @step('Submit for review')
 def submit(api, app, ver):
-    # After App Review asks for more, the earlier submission is reopened ("unresolved issues"): resubmit that one.
-    subs = api.get('/v1/reviewSubmissions', **{'filter[app]': app['id'], 'filter[platform]': 'IOS',
-                                                'filter[state]': 'READY_FOR_REVIEW,UNRESOLVED_ISSUES'})['data']
-    if subs:
-        sub = subs[0]
-        print(f"   reusing the submission in state {sub['attributes'].get('state')}")
-    else:
+    def new_submission():
         sub = api.post('/v1/reviewSubmissions', {'data': {'type': 'reviewSubmissions', 'attributes': {'platform': 'IOS'},
                                                            'relationships': {'app': rel('apps', app['id'])}}})['data']
-    try:
         api.post('/v1/reviewSubmissionItems', {'data': {'type': 'reviewSubmissionItems', 'relationships': {
             'reviewSubmission': rel('reviewSubmissions', sub['id']),
             'appStoreVersion': rel('appStoreVersions', ver['id'])}}})
+        return sub
+
+    def send(sub):
+        api.patch(f"/v1/reviewSubmissions/{sub['id']}", {'data': {'type': 'reviewSubmissions', 'id': sub['id'],
+                                                                   'attributes': {'submitted': True}}})
+
+    subs = api.get('/v1/reviewSubmissions', **{'filter[app]': app['id'], 'filter[platform]': 'IOS',
+                                                'filter[state]': 'READY_FOR_REVIEW,UNRESOLVED_ISSUES'})['data']
+    if not subs:
+        send(new_submission())
+        print('   submitted to App Review')
+        return
+    old = subs[0]
+    print(f"   open submission in state {old['attributes'].get('state')}")
+    for it in api.get(f"/v1/reviewSubmissions/{old['id']}/items")['data']:
+        print(f"   item: {it['attributes'].get('state')}")
+    try:
+        send(old)
+        print('   resubmitted to App Review')
+        return
     except ApiError as e:
-        print(f'   (version already in the submission: {e})')
-    api.patch(f"/v1/reviewSubmissions/{sub['id']}", {'data': {'type': 'reviewSubmissions', 'id': sub['id'],
-                                                               'attributes': {'submitted': True}}})
+        print(f'   resubmitting it: {e}')
+    # Otherwise: cancel it and submit the version in a new one.
+    api.patch(f"/v1/reviewSubmissions/{old['id']}", {'data': {'type': 'reviewSubmissions', 'id': old['id'],
+                                                               'attributes': {'canceled': True}}})
+    print('   canceled it; submitting anew')
+    for _ in range(10):
+        st = api.get(f"/v1/reviewSubmissions/{old['id']}")['data']['attributes'].get('state')
+        if st not in ('CANCELING',):
+            break
+        time.sleep(5)
+    send(new_submission())
     print('   submitted to App Review')
 
 
@@ -369,6 +395,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--submit', action='store_true', help='also submit the version for review')
     ap.add_argument('--copyright', default='')
+    ap.add_argument('--submit-only', action='store_true', help='only (re)submit: change nothing else')
     args = ap.parse_args()
     listing = json.loads((HERE / 'appstore-metadata' / 'listing.json').read_text())
     cfg, meta = listing['common'], listing['locales']
@@ -378,6 +405,11 @@ def main():
     app = find_app(api, cfg['bundleId'])
     if not app:
         sys.exit(1)
+    if args.submit_only:
+        ver = version(api, app, cfg)
+        if ver:
+            submit(api, app, ver)
+        sys.exit(1 if failures else 0)
     info = app_info(api, app, cfg, meta)
     content_rights(api, app)
     if info:
