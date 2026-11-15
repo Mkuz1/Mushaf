@@ -803,6 +803,38 @@ void main() {
     await finish(tester);
   });
 
+  testWidgets('iPhone Fold: one page folded, the spread unfolded, the same place across folding', (tester) async {
+    // Reported sizes (not yet confirmed by Apple), in points at 3×: outer 474 × 696, inner 904 × 640 (landscape).
+    const folded = Size(474, 696), unfolded = Size(904, 640);
+    await pumpHome(tester, folded, meta: true, saved: {'lastPage': 2});
+    expect(model.effectiveDual, isFalse);
+    expect(model.visiblePages(), [2]);
+    model.select(const AyahKey(2, 3));
+    await shot(tester, 'iphone-fold-outer');
+    // Unfolding resizes the window while the app runs: the spread with page 2 in it, the ayah still selected.
+    tester.view.physicalSize = unfolded;
+    await tester.pumpAndSettle();
+    expect(model.effectiveDual, isTrue);
+    expect(model.visiblePages(), contains(2));
+    expect(model.selected, const AyahKey(2, 3));
+    expect(tester.takeException(), isNull);
+    await shot(tester, 'iphone-fold-inner');
+    // Turning the page while unfolded, then folding: the single page shown is the one being read.
+    model.goTo(42);
+    await tester.pumpAndSettle();
+    tester.view.physicalSize = folded;
+    await tester.pumpAndSettle();
+    expect(model.effectiveDual, isFalse);
+    expect(model.page, 42);
+    expect(model.visiblePages(), [42]);
+    // Held upright while unfolded (taller than wide): one large page.
+    tester.view.physicalSize = const Size(640, 904);
+    await tester.pumpAndSettle();
+    expect(model.effectiveDual, isFalse);
+    expect(model.page, 42);
+    await finish(tester);
+  });
+
   testWidgets('phone in Arabic and dark mode, with the recitation options', (tester) async {
     // Interface text in Amiri (wider than Android's own Arabic font), so the fit below is a safe check. Fonts stay
     // loaded for later tests, so this test runs last.
