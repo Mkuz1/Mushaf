@@ -347,8 +347,18 @@ final class AppModel {
     /// mushaf://page/128, mushaf://ayah/2/255 (also mushaf://2:255) and mushaf://surah/18.
     func handle(_ url: URL) {
         guard url.scheme == "mushaf" else { return }
+        // A link opens the Mushaf where it points, past the opening page.
+        showDedication = false
         let parts = ([url.host ?? ""] + url.pathComponents.filter { $0 != "/" }).filter { !$0.isEmpty }
         switch parts.first {
+        case "tafsir", "translation":
+            // mushaf://tafsir/2/255: the verse, with its tafsir (or translation) open beside the page.
+            let nums = parts.dropFirst().compactMap(Int.init)
+            if nums.count == 2 {
+                let key = AyahKey(nums[0], nums[1])
+                go(to: key)
+                showText(parts.first == "tafsir" ? .tafsir : .translation, for: key)
+            }
         case "page": if let p = parts.dropFirst().first.flatMap(Int.init) { go(to: p) }
         case "surah": if let n = parts.dropFirst().first.flatMap(Int.init), (1...114).contains(n) { go(to: startPage(sura: n)) }
         case "ayah":
