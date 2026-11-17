@@ -6,12 +6,21 @@ cd "$(dirname "$0")"
 APP="$1"   # the simulator build's Mushaf.app
 OUT=../ios-assets/appstore-assets/tv
 ID=com.kousa.mushaf
-# A fresh Apple TV 4K simulator on the newest tvOS runtime installed (the workflow downloads it).
-RUNTIME=$(xcrun simctl list runtimes available | grep -oE 'com\.apple\.CoreSimulator\.SimRuntime\.tvOS-[0-9-]+' | tail -1)
-TYPE=$(xcrun simctl list devicetypes | grep -E "Apple TV 4K" | grep -oE 'com\.apple\.CoreSimulator\.SimDeviceType\.[A-Za-z0-9-]+' | tail -1)
-[ -n "$RUNTIME" ] && [ -n "$TYPE" ] || { echo "No tvOS runtime or Apple TV device type"; xcrun simctl list runtimes; exit 1; }
-UDID=$(xcrun simctl create "Mushaf TV" "$TYPE" "$RUNTIME") || exit 1
-echo "Simulator: $UDID ($TYPE, $RUNTIME)"
+# An Apple TV 4K simulator (not the 1080p one) on the newest tvOS runtime installed.
+UDID=$(xcrun simctl list -j devices available | python3 -c '
+import json, sys, re
+devs = json.load(sys.stdin)["devices"]
+best = None
+for runtime, items in devs.items():
+    m = re.search(r"tvOS-(\d+)-(\d+)", runtime)
+    if not m: continue
+    for d in items:
+        if "Apple TV 4K" in d["name"] and "1080p" not in d["name"]:
+            key = (int(m.group(1)), int(m.group(2)), d["name"])
+            if best is None or key > best[0]: best = (key, d["udid"])
+print(best[1] if best else "")')
+[ -n "$UDID" ] || { echo "No Apple TV simulator"; xcrun simctl list devices; exit 1; }
+echo "Simulator: $UDID"
 xcrun simctl boot "$UDID" || exit 1
 xcrun simctl bootstatus "$UDID" -b || exit 1
 open -a Simulator --args -CurrentDeviceUDID "$UDID" 2>/dev/null
