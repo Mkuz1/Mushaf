@@ -49,9 +49,12 @@ jobs:
           printf '%s\n' "$KEY" > "$key"
           auth=(-allowProvisioningUpdates -authenticationKeyPath "$key"
                 -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER")
+          # Archived unsigned: automatic signing would want a development profile, which Apple only makes for a
+          # team with a registered Apple TV. The export signs it for App Store distribution.
           xcodebuild -project MushafTV.xcodeproj -scheme MushafTV -configuration Release \
             -destination 'generic/platform=tvOS' -archivePath "$RUNNER_TEMP/MushafTV.xcarchive" \
-            DEVELOPMENT_TEAM="$TEAM" CODE_SIGN_STYLE=Automatic "${auth[@]}" archive
+            DEVELOPMENT_TEAM="$TEAM" CODE_SIGNING_ALLOWED=NO archive > "$RUNNER_TEMP/archive.log" \
+            || { grep -B2 -A8 "error:" "$RUNNER_TEMP/archive.log" | head -150; exit 1; }
           cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -85,7 +88,8 @@ jobs:
           brew install xcodegen >/dev/null
           ./make-project.sh
           xcodebuild -project MushafTV.xcodeproj -scheme MushafTV -configuration Debug -sdk appletvsimulator \
-            -derivedDataPath "$RUNNER_TEMP/dd" CODE_SIGNING_ALLOWED=NO build | tail -5
+            -derivedDataPath "$RUNNER_TEMP/dd" CODE_SIGNING_ALLOWED=NO build > "$RUNNER_TEMP/build.log" \
+            || { grep -B2 -A8 "error:" "$RUNNER_TEMP/build.log" | head -150; exit 1; }
       - name: Capture
         run: MushafTV/capture.sh "$RUNNER_TEMP/dd/Build/Products/Debug-appletvsimulator/Mushaf.app"
       - name: Push to the tv-screenshots branch
