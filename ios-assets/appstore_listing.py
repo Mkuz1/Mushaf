@@ -215,7 +215,7 @@ def version_texts(api, ver, cfg, meta, first_version):
                 api.get(f"/v1/appStoreVersions/{ver['id']}/appStoreVersionLocalizations")['data']}
     out = {}
     for lang, locale in cfg['locales'].items():
-        description = meta[lang]['descriptionMac'] if PLATFORM == 'MAC_OS' else meta[lang]['description']
+        description = meta[lang][{'MAC_OS': 'descriptionMac', 'TV_OS': 'descriptionTV'}.get(PLATFORM, 'description')]
         attrs = {'description': description, 'keywords': meta[lang]['keywords'],
                  'promotionalText': meta[lang]['promotionalText'],
                  'supportUrl': cfg['supportUrl'], 'marketingUrl': cfg['marketingUrl']}
@@ -240,8 +240,8 @@ def version_texts(api, ver, cfg, meta, first_version):
 
 @step('Build')
 def attach_build(api, app, ver, cfg):
-    if PLATFORM == 'MAC_OS':
-        # The Mac builds are numbered by their workflow's runs: the latest one of this version.
+    if PLATFORM in ('MAC_OS', 'TV_OS'):
+        # The Mac and Apple TV builds are numbered by their workflow's runs: the latest one of this version.
         builds = api.get('/v1/builds', **{'filter[app]': app['id'], 'filter[preReleaseVersion.version]': cfg['version'],
                                            'filter[preReleaseVersion.platform]': PLATFORM, 'sort': '-uploadedDate',
                                            'limit': 5})['data']
@@ -267,6 +267,7 @@ SHOTS = [
     (['iphone-duo-inner', 'iphone-duo-outer'], ['APP_IPHONE_DUO']),
 ]
 SHOTS_MAC = [(['mac'], ['APP_DESKTOP'])]
+SHOTS_TV = [(['tv'], ['APP_APPLE_TV'])]
 
 
 def upload_shot(api, set_id, path):
@@ -291,7 +292,7 @@ def screenshots(api, locs, cfg):
     for lang, loc in locs.items():
         sets = {s['attributes']['screenshotDisplayType']: s for s in
                 api.get(f"/v1/appStoreVersionLocalizations/{loc['id']}/appScreenshotSets", limit=50)['data']}
-        for folders, types in (SHOTS_MAC if PLATFORM == 'MAC_OS' else SHOTS):
+        for folders, types in {'MAC_OS': SHOTS_MAC, 'TV_OS': SHOTS_TV}.get(PLATFORM, SHOTS):
             folder = ' + '.join(folders)
             files = [f for d in folders for f in sorted((root / d / lang).glob('*.png'))][:10]
             if not files:
@@ -339,7 +340,7 @@ def screenshots(api, locs, cfg):
 @step('App Review information')
 def review(api, ver, cfg):
     video = os.environ.get('REVIEW_VIDEO', '').strip()
-    notes = cfg['reviewNotesMac' if PLATFORM == 'MAC_OS' else 'reviewNotes'].replace('{video}', video or '(link to follow)')
+    notes = cfg[{'MAC_OS': 'reviewNotesMac', 'TV_OS': 'reviewNotesTV'}.get(PLATFORM, 'reviewNotes')].replace('{video}', video or '(link to follow)')
     attrs = {'notes': notes, 'demoAccountRequired': False}
     # The App Review contact, from the run's inputs (masked in the logs; never stored in this public repo).
     for k, env in (('contactFirstName', 'REVIEW_FIRST_NAME'), ('contactLastName', 'REVIEW_LAST_NAME'),
@@ -406,7 +407,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--submit', action='store_true', help='also submit the version for review')
     ap.add_argument('--copyright', default='')
-    ap.add_argument('--platform', default='IOS', choices=['IOS', 'MAC_OS'])
+    ap.add_argument('--platform', default='IOS', choices=['IOS', 'MAC_OS', 'TV_OS'])
     ap.add_argument('--submit-only', action='store_true', help='only (re)submit: change nothing else')
     args = ap.parse_args()
     listing = json.loads((HERE / 'appstore-metadata' / 'listing.json').read_text())

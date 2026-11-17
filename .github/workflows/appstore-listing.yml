@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       platform:
-        description: IOS (iPhone and iPad) or MAC_OS
+        description: IOS (iPhone and iPad), MAC_OS or TV_OS (Apple TV)
         type: choice
-        options: [IOS, MAC_OS]
+        options: [IOS, MAC_OS, TV_OS]
         default: IOS
       copyright:
         description: Copyright line, e.g. "2026 Your Name" (empty to leave it as is)
