@@ -33,6 +33,8 @@ struct MenuView: View {
             }
             .navigationTitle(model.caption)
         }
+        // Opaque: the menu covers the pages instead of floating over them.
+        .background(Color(red: 0.05, green: 0.16, blue: 0.12).ignoresSafeArea())
     }
 }
 
