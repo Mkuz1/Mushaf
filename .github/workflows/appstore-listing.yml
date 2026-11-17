@@ -7,6 +7,11 @@ name: App Store listing
 on:
   workflow_dispatch:
     inputs:
+      platform:
+        description: IOS (iPhone and iPad) or MAC_OS
+        type: choice
+        options: [IOS, MAC_OS]
+        default: IOS
       copyright:
         description: Copyright line, e.g. "2026 Your Name" (empty to leave it as is)
         required: false
@@ -65,7 +70,7 @@ jobs:
           export REVIEW_EMAIL=$(jq -r '.inputs.contact_email // empty' "$GITHUB_EVENT_PATH")
           export REVIEW_VIDEO=$(jq -r '.inputs.video_url // empty' "$GITHUB_EVENT_PATH")
           export REVIEW_PHONE=$(jq -r '.inputs.contact_phone // empty' "$GITHUB_EVENT_PATH")
-          args=()
+          args=(--platform "${{ inputs.platform || 'IOS' }}")
           [ -n "$COPYRIGHT" ] && args+=(--copyright "$COPYRIGHT")
           [ "${{ inputs.submit }}" = "true" ] && args+=(--submit)
           [ "${{ inputs.submit_only }}" = "true" ] && args+=(--submit-only)
