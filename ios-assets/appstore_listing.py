@@ -384,8 +384,15 @@ def submit(api, app, ver):
         return
     old = subs[0]
     print(f"   open submission in state {old['attributes'].get('state')}")
-    for it in api.get(f"/v1/reviewSubmissions/{old['id']}/items")['data']:
+    items = api.get(f"/v1/reviewSubmissions/{old['id']}/items")['data']
+    for it in items:
         print(f"   item: {it['attributes'].get('state')}")
+    if not items:
+        # Left empty by an earlier attempt that failed: put the version in it.
+        api.post('/v1/reviewSubmissionItems', {'data': {'type': 'reviewSubmissionItems', 'relationships': {
+            'reviewSubmission': rel('reviewSubmissions', old['id']),
+            'appStoreVersion': rel('appStoreVersions', ver['id'])}}})
+        print('   version added to it')
     try:
         send(old)
         print('   resubmitted to App Review')
