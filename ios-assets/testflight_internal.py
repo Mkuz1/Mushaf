@@ -91,7 +91,39 @@ def main():
         g = api.patch(f"/v1/betaGroups/{g['id']}", {'data': {'type': 'betaGroups', 'id': g['id'], 'attributes': {
             'publicLinkEnabled': True, 'publicLinkLimitEnabled': True, 'publicLinkLimit': 3}}})['data']
         print(f"External group {g['attributes']['name']}: public link {g['attributes'].get('publicLink')}")
-        b = api.get(f"/v1/betaGroups/{g['id']}/builds", limit=5)['data']
+        # The newest build of each platform (iPhone/iPad, Mac, Apple TV): in this group, with test notes, and
+        # sent to Beta App Review (needed once per build before external testers get it).
+        for platform, label in (('IOS', 'iPhone/iPad'), ('MAC_OS', 'Mac'), ('TV_OS', 'Apple TV')):
+            found = api.get('/v1/builds', **{'filter[app]': app['id'], 'filter[preReleaseVersion.platform]': platform,
+                                              'filter[processingState]': 'VALID', 'sort': '-uploadedDate', 'limit': 1,
+                                              'include': 'buildBetaDetail'})
+            if not found['data']:
+                print(f'   {label}: no processed build')
+                continue
+            b = found['data'][0]
+            n = b['attributes']['version']
+            try:
+                api.post(f"/v1/betaGroups/{g['id']}/relationships/builds", {'data': [{'type': 'builds', 'id': b['id']}]})
+            except ApiError as e:
+                print(f'   {label} {n}: adding to the group: {e}')
+            locs = api.get(f"/v1/builds/{b['id']}/betaBuildLocalizations")['data']
+            if not any(l['attributes'].get('locale') == 'en-US' for l in locs):
+                try:
+                    api.post('/v1/betaBuildLocalizations', {'data': {'type': 'betaBuildLocalizations', 'attributes': {
+                        'locale': 'en-US', 'whatsNew': f"Mus'haf for {label}: read the Madinah Mushaf, listen verse by "
+                                                       "verse, and check the surah index, reciters and settings."},
+                        'relationships': {'build': rel('builds', b['id'])}}})
+                except ApiError as e:
+                    print(f'   {label} {n}: test notes: {e}')
+            try:
+                api.post('/v1/betaAppReviewSubmissions', {'data': {'type': 'betaAppReviewSubmissions',
+                                                                   'relationships': {'build': rel('builds', b['id'])}}})
+                sent = 'sent to Beta App Review'
+            except ApiError as e:
+                sent = f'beta review: {e}'
+            detail = next((d['attributes'] for d in found.get('included', []) if d['type'] == 'buildBetaDetails'), {})
+            print(f"   {label} build {n}: in the group; external state {detail.get('externalBuildState')}; {sent}")
+        b = api.get(f"/v1/betaGroups/{g['id']}/builds", limit=20)['data']
         print(f"   builds in it: {', '.join(x['attributes']['version'] for x in b) or 'none'}")
     sys.exit(0)
 
