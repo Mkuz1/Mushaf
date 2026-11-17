@@ -26,7 +26,9 @@ struct MushafApp: App {
                 .task {
                     await model.bootstrap()
                     await model.reminder.start()
+                    #if !APPSTORE
                     await model.updates.check()
+                    #endif
                 }
         }
         .defaultSize(width: 1280, height: 900)
@@ -55,6 +57,8 @@ struct AppCommands: Commands {
             Button(tr("Mushaf Help")) { model.showHelp = true }
                 .keyboardShortcut("?", modifiers: [.command])
             Button(tr("About This Sadaqa Jariyah")) { withAnimation { model.showDedication = true } }
+            // The Mac App Store build updates through the App Store and links to no other downloads.
+            #if !APPSTORE
             Button(tr("Check for Updates…")) { Task { await model.updates.check(manual: true) } }
             Menu(tr("Download Mus'haf")) {
                 ForEach(Remote.downloads.indices, id: \.self) { i in
@@ -62,6 +66,7 @@ struct AppCommands: Commands {
                     Button(tr(d.title)) { NSWorkspace.shared.open(d.url) }
                 }
             }
+            #endif
             Divider()
             Picker(tr("Language"), selection: Binding(get: { Localizer.shared.language }, set: { model.setLanguage($0) })) {
                 ForEach(AppLanguage.allCases) { Text($0.nativeName).tag($0) }

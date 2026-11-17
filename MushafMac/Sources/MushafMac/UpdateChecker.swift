@@ -45,6 +45,9 @@ final class UpdateChecker {
     }
 
     func check(manual: Bool = false) async {
+        #if APPSTORE
+        return  // The Mac App Store updates the App Store build.
+        #endif
         guard !checking, let current = Self.currentVersion else { return }
         let defaults = UserDefaults.standard
         if !manual, Date().timeIntervalSince1970 - defaults.double(forKey: "lastUpdateCheck") < 6 * 3600 {

@@ -1,0 +1,73 @@
+# Builds the Mac app (MushafMac) for the Mac App Store, signs it and uploads it to App Store Connect, where it
+# appears under the same app as the iPhone and iPad version (universal purchase, bundle ID com.kousa.mushaf).
+# Signing is automatic, with the App Store Connect API key, like the App Store workflow (see appstore.yml).
+name: Mac App Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: Build number (higher than any Mac build uploaded before; empty for this workflow's run number)
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: xcode-27
+    defaults:
+      run:
+        working-directory: MushafMac/AppStore
+    steps:
+      - uses: actions/checkout@v4
+      - name: App Store Connect secrets
+        env:
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          ISSUER: ${{ secrets.APPSTORE_ISSUER_ID }}
+          KEY: ${{ secrets.APPSTORE_KEY }}
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          missing=""
+          for n in KEY_ID ISSUER KEY TEAM; do [ -n "${!n}" ] || missing="$missing $n"; done
+          if [ -n "$missing" ]; then echo "::error::Missing secrets:$missing"; exit 1; fi
+      - name: Xcode
+        run: |
+          x=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -1)
+          [ -n "$x" ] || x=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$x"
+          xcodebuild -version
+      - name: Project
+        run: |
+          brew install xcodegen >/dev/null
+          MUSHAF_BUILD="${{ inputs.build_number || github.run_number }}" ./make-project.sh
+      - name: Archive, sign and upload
+        env:
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          ISSUER: ${{ secrets.APPSTORE_ISSUER_ID }}
+          KEY: ${{ secrets.APPSTORE_KEY }}
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          key="$RUNNER_TEMP/AuthKey.p8"
+          printf '%s\n' "$KEY" > "$key"
+          auth=(-allowProvisioningUpdates -authenticationKeyPath "$key"
+                -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER")
+          xcodebuild -project Mushaf.xcodeproj -scheme Mushaf -configuration Release \
+            -destination 'generic/platform=macOS' -archivePath "$RUNNER_TEMP/Mushaf.xcarchive" \
+            DEVELOPMENT_TEAM="$TEAM" "${auth[@]}" archive
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$TEAM</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/Mushaf.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" "${auth[@]}"
+          rm -f "$key"
+          echo "Uploaded. The Mac build appears in App Store Connect after processing." >> "$GITHUB_STEP_SUMMARY"
