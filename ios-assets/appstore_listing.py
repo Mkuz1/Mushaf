@@ -117,7 +117,9 @@ def app_info(api, app, cfg, meta):
                 api.get(f"/v1/appInfos/{info['id']}/appInfoLocalizations")['data']}
     for lang, locale in cfg['locales'].items():
         attrs = {'name': meta[lang]['name'], 'subtitle': meta[lang]['subtitle'],
-                 'privacyPolicyUrl': cfg['privacyPolicyUrl']}
+                 'privacyPolicyUrl': cfg['privacyPolicyUrl'],
+                 # Apple TV shows the policy itself (it can't open the link).
+                 'privacyPolicyText': meta[lang]['privacyPolicyText']}
         try:
             if locale in existing:
                 api.patch(f"/v1/appInfoLocalizations/{existing[locale]['id']}",
