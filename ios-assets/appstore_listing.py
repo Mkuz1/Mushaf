@@ -24,6 +24,8 @@ import requests
 API = 'https://api.appstoreconnect.apple.com'
 HERE = Path(__file__).resolve().parent
 failures = []
+# IOS (iPhone and iPad) or MAC_OS: set by --platform.
+PLATFORM = 'IOS'
 
 
 def token():
@@ -190,7 +192,7 @@ def price(api, app):
 
 @step('Version')
 def version(api, app, cfg):
-    versions = api.get(f"/v1/apps/{app['id']}/appStoreVersions", **{'filter[platform]': 'IOS', 'limit': 20})['data']
+    versions = api.get(f"/v1/apps/{app['id']}/appStoreVersions", **{'filter[platform]': PLATFORM, 'limit': 20})['data']
     editable = [v for v in versions if v['attributes']['appStoreState'] in
                 ('PREPARE_FOR_SUBMISSION', 'DEVELOPER_REJECTED', 'REJECTED', 'METADATA_REJECTED',
                  'INVALID_BINARY')]
@@ -198,7 +200,7 @@ def version(api, app, cfg):
         v = editable[0]
     else:
         v = api.post('/v1/appStoreVersions', {'data': {'type': 'appStoreVersions', 'attributes': {
-            'platform': 'IOS', 'versionString': cfg['version']}, 'relationships': {'app': rel('apps', app['id'])}}})['data']
+            'platform': PLATFORM, 'versionString': cfg['version']}, 'relationships': {'app': rel('apps', app['id'])}}})['data']
     attrs = {'versionString': cfg['version'], 'releaseType': 'AFTER_APPROVAL'}
     if cfg.get('copyright'):
         attrs['copyright'] = cfg['copyright']
@@ -213,7 +215,8 @@ def version_texts(api, ver, cfg, meta, first_version):
                 api.get(f"/v1/appStoreVersions/{ver['id']}/appStoreVersionLocalizations")['data']}
     out = {}
     for lang, locale in cfg['locales'].items():
-        attrs = {'description': meta[lang]['description'], 'keywords': meta[lang]['keywords'],
+        description = meta[lang]['descriptionMac'] if PLATFORM == 'MAC_OS' else meta[lang]['description']
+        attrs = {'description': description, 'keywords': meta[lang]['keywords'],
                  'promotionalText': meta[lang]['promotionalText'],
                  'supportUrl': cfg['supportUrl'], 'marketingUrl': cfg['marketingUrl']}
         if not first_version:
@@ -237,16 +240,23 @@ def version_texts(api, ver, cfg, meta, first_version):
 
 @step('Build')
 def attach_build(api, app, ver, cfg):
-    builds = api.get('/v1/builds', **{'filter[app]': app['id'], 'filter[version]': cfg['build'],
-                                       'filter[preReleaseVersion.platform]': 'IOS', 'limit': 5})['data']
+    if PLATFORM == 'MAC_OS':
+        # The Mac builds are numbered by their workflow's runs: the latest one of this version.
+        builds = api.get('/v1/builds', **{'filter[app]': app['id'], 'filter[preReleaseVersion.version]': cfg['version'],
+                                           'filter[preReleaseVersion.platform]': PLATFORM, 'sort': '-uploadedDate',
+                                           'limit': 5})['data']
+    else:
+        builds = api.get('/v1/builds', **{'filter[app]': app['id'], 'filter[version]': cfg['build'],
+                                           'filter[preReleaseVersion.platform]': PLATFORM, 'limit': 5})['data']
     if not builds:
-        raise RuntimeError(f"build {cfg['build']} isn't in App Store Connect yet (still processing?)")
+        raise RuntimeError("the build isn't in App Store Connect yet (still processing?)")
     b = builds[0]
+    number = b['attributes']['version']
     state = b['attributes'].get('processingState')
     if state != 'VALID':
-        raise RuntimeError(f"build {cfg['build']} is {state} (wait for Apple to finish processing it)")
+        raise RuntimeError(f"build {number} is {state} (wait for Apple to finish processing it)")
     api.patch(f"/v1/appStoreVersions/{ver['id']}/relationships/build", rel('builds', b['id']))
-    print(f"   build {cfg['build']} attached")
+    print(f"   build {number} attached")
 
 
 # Screenshot folders, and the display type App Store Connect files them under (tried in order).
@@ -256,6 +266,7 @@ SHOTS = [
     (['ipad-13'], ['APP_IPAD_PRO_3GEN_129']),
     (['iphone-duo-inner', 'iphone-duo-outer'], ['APP_IPHONE_DUO']),
 ]
+SHOTS_MAC = [(['mac'], ['APP_DESKTOP'])]
 
 
 def upload_shot(api, set_id, path):
@@ -280,7 +291,7 @@ def screenshots(api, locs, cfg):
     for lang, loc in locs.items():
         sets = {s['attributes']['screenshotDisplayType']: s for s in
                 api.get(f"/v1/appStoreVersionLocalizations/{loc['id']}/appScreenshotSets", limit=50)['data']}
-        for folders, types in SHOTS:
+        for folders, types in (SHOTS_MAC if PLATFORM == 'MAC_OS' else SHOTS):
             folder = ' + '.join(folders)
             files = [f for d in folders for f in sorted((root / d / lang).glob('*.png'))][:10]
             if not files:
@@ -328,7 +339,7 @@ def screenshots(api, locs, cfg):
 @step('App Review information')
 def review(api, ver, cfg):
     video = os.environ.get('REVIEW_VIDEO', '').strip()
-    notes = cfg['reviewNotes'].replace('{video}', video or '(link to follow)')
+    notes = cfg['reviewNotesMac' if PLATFORM == 'MAC_OS' else 'reviewNotes'].replace('{video}', video or '(link to follow)')
     attrs = {'notes': notes, 'demoAccountRequired': False}
     # The App Review contact, from the run's inputs (masked in the logs; never stored in this public repo).
     for k, env in (('contactFirstName', 'REVIEW_FIRST_NAME'), ('contactLastName', 'REVIEW_LAST_NAME'),
@@ -351,7 +362,7 @@ def review(api, ver, cfg):
 @step('Submit for review')
 def submit(api, app, ver):
     def new_submission():
-        sub = api.post('/v1/reviewSubmissions', {'data': {'type': 'reviewSubmissions', 'attributes': {'platform': 'IOS'},
+        sub = api.post('/v1/reviewSubmissions', {'data': {'type': 'reviewSubmissions', 'attributes': {'platform': PLATFORM},
                                                            'relationships': {'app': rel('apps', app['id'])}}})['data']
         api.post('/v1/reviewSubmissionItems', {'data': {'type': 'reviewSubmissionItems', 'relationships': {
             'reviewSubmission': rel('reviewSubmissions', sub['id']),
@@ -362,7 +373,7 @@ def submit(api, app, ver):
         api.patch(f"/v1/reviewSubmissions/{sub['id']}", {'data': {'type': 'reviewSubmissions', 'id': sub['id'],
                                                                    'attributes': {'submitted': True}}})
 
-    subs = api.get('/v1/reviewSubmissions', **{'filter[app]': app['id'], 'filter[platform]': 'IOS',
+    subs = api.get('/v1/reviewSubmissions', **{'filter[app]': app['id'], 'filter[platform]': PLATFORM,
                                                 'filter[state]': 'READY_FOR_REVIEW,UNRESOLVED_ISSUES'})['data']
     if not subs:
         send(new_submission())
@@ -395,12 +406,16 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--submit', action='store_true', help='also submit the version for review')
     ap.add_argument('--copyright', default='')
+    ap.add_argument('--platform', default='IOS', choices=['IOS', 'MAC_OS'])
     ap.add_argument('--submit-only', action='store_true', help='only (re)submit: change nothing else')
     args = ap.parse_args()
     listing = json.loads((HERE / 'appstore-metadata' / 'listing.json').read_text())
     cfg, meta = listing['common'], listing['locales']
     if args.copyright:
         cfg['copyright'] = args.copyright
+    global PLATFORM
+    PLATFORM = args.platform
+    print(f'Platform: {PLATFORM}')
     api = Api()
     app = find_app(api, cfg['bundleId'])
     if not app:
@@ -418,7 +433,7 @@ def main():
     ver = version(api, app, cfg)
     if not ver:
         sys.exit(1)
-    first = len(api.get(f"/v1/apps/{app['id']}/appStoreVersions", **{'filter[platform]': 'IOS'})['data']) <= 1
+    first = len(api.get(f"/v1/apps/{app['id']}/appStoreVersions", **{'filter[platform]': PLATFORM})['data']) <= 1
     locs = version_texts(api, ver, cfg, meta, first) or {}
     attach_build(api, app, ver, cfg)
     screenshots(api, locs, cfg)
