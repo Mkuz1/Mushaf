@@ -71,6 +71,7 @@ struct RootView: View {
             MenuView(close: { showMenu = false })
                 .environment(model)
                 .environment(\.layoutDirection, Localizer.shared.language.layoutDirection)
+                .presentationBackground(Color(red: 0.05, green: 0.16, blue: 0.12))
         }
         #if DEBUG
         // Screenshots (simulator, Debug builds only): -showMenu YES opens the menu, -recite YES starts recitation.
