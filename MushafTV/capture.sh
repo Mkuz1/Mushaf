@@ -6,11 +6,17 @@ cd "$(dirname "$0")"
 APP="$1"   # the simulator build's Mushaf.app
 OUT=../ios-assets/appstore-assets/tv
 ID=com.kousa.mushaf
-UDID=$(xcrun simctl list devices available | grep -m1 -E "Apple TV 4K" | grep -oE '[0-9A-F-]{36}')
-[ -n "$UDID" ] || UDID=$(xcrun simctl list devices available | grep -m1 "Apple TV" | grep -oE '[0-9A-F-]{36}')
-echo "Simulator: $UDID"
-xcrun simctl boot "$UDID" 2>/dev/null; xcrun simctl bootstatus "$UDID" -b
-xcrun simctl install "$UDID" "$APP"
+# A fresh Apple TV 4K simulator on the newest tvOS runtime installed (the workflow downloads it).
+RUNTIME=$(xcrun simctl list runtimes available | grep -oE 'com\.apple\.CoreSimulator\.SimRuntime\.tvOS-[0-9-]+' | tail -1)
+TYPE=$(xcrun simctl list devicetypes | grep -E "Apple TV 4K" | grep -oE 'com\.apple\.CoreSimulator\.SimDeviceType\.[A-Za-z0-9-]+' | tail -1)
+[ -n "$RUNTIME" ] && [ -n "$TYPE" ] || { echo "No tvOS runtime or Apple TV device type"; xcrun simctl list runtimes; exit 1; }
+UDID=$(xcrun simctl create "Mushaf TV" "$TYPE" "$RUNTIME") || exit 1
+echo "Simulator: $UDID ($TYPE, $RUNTIME)"
+xcrun simctl boot "$UDID" || exit 1
+xcrun simctl bootstatus "$UDID" -b || exit 1
+open -a Simulator --args -CurrentDeviceUDID "$UDID" 2>/dev/null
+sleep 20
+xcrun simctl install "$UDID" "$APP" || exit 1
 
 shot() {  # shot <file> <wait> <launch arguments...>
   local file=$1 wait=$2; shift 2
