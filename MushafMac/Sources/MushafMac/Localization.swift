@@ -281,6 +281,17 @@ private enum Strings {
         "You have the latest version": ("Vous avez la dernière version", "لديك أحدث إصدار"),
         "Version %@": ("Version %@", "الإصدار %@"),
         "Couldn't check for updates": ("Impossible de vérifier les mises à jour", "تعذّر التحقق من التحديثات"),
+        // Apple TV
+        "Juz %d": ("Juz %d", "الجزء %d"),
+        "Night mode": ("Mode nuit", "الوضع الليلي"),
+        "Recite from this page": ("Réciter depuis cette page", "التلاوة من هذه الصفحة"),
+        "Stop recitation": ("Arrêter la récitation", "إيقاف التلاوة"),
+        "Loading…": ("Chargement…", "جارٍ التحميل…"),
+        "Couldn't load the Mushaf. Check the connection.": ("Impossible de charger le Mushaf. Vérifiez la connexion.", "تعذّر تحميل المصحف. تحقّق من الاتصال."),
+        "Swipe to turn pages · Play/Pause to recite · Click for the menu": (
+            "Balayez pour tourner les pages · Lecture/Pause pour réciter · Cliquez pour le menu",
+            "اسحب لتقليب الصفحات · زر التشغيل للتلاوة · اضغط لفتح القائمة"),
+        "Settings": ("Réglages", "الإعدادات"),
         // The Friday reminder
         "Reminders": ("Rappels", "التذكيرات"),
         "Surat Al-Kahf on Fridays": ("Sourate Al-Kahf le vendredi", "سورة الكهف يوم الجمعة"),

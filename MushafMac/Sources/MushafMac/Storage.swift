@@ -31,7 +31,12 @@ enum Quran {
 /// On-disk cache locations under ~/Library/Application Support/Mushaf (apart from Quran Reader HD's MushafMac).
 enum Paths {
     static let root: URL = {
+        #if os(tvOS)
+        // Apple TV apps keep data only in Caches (tvOS may purge it; everything here can be downloaded again).
+        let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        #else
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        #endif
         let url = base.appendingPathComponent("Mushaf", isDirectory: true)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
@@ -143,6 +148,7 @@ enum Downloader {
         fatalError("unreachable")
     }
 
+    #if os(macOS)
     static func unzip(_ zip: URL, into dir: URL) throws {
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/usr/bin/ditto")
@@ -151,4 +157,5 @@ enum Downloader {
         p.waitUntilExit()
         guard p.terminationStatus == 0 else { throw DownloadError.unzip }
     }
+    #endif
 }

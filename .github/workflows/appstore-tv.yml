@@ -1,0 +1,96 @@
+# Mus'haf for Apple TV (MushafTV): builds it, signs it automatically with the App Store Connect API key and
+# uploads it to App Store Connect, under the same app as the iPhone, iPad and Mac versions (universal purchase).
+# With "screenshots", also captures the App Store screenshots in the tvOS simulator and pushes them to the
+# tv-screenshots branch.
+name: Apple TV App Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: Build number (higher than any Apple TV build uploaded before; empty for this workflow's run number)
+        required: false
+      upload:
+        description: Build and upload to App Store Connect
+        type: boolean
+        default: true
+      screenshots:
+        description: Capture the App Store screenshots
+        type: boolean
+        default: true
+
+jobs:
+  upload:
+    if: inputs.upload
+    runs-on: xcode-27
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: MushafTV
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_27*.app | sort -V | tail -1)"
+          xcodebuild -version
+      - name: Project
+        run: |
+          brew install xcodegen >/dev/null
+          MUSHAF_BUILD="${{ inputs.build_number || github.run_number }}" ./make-project.sh
+      - name: Archive, sign and upload
+        env:
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          ISSUER: ${{ secrets.APPSTORE_ISSUER_ID }}
+          KEY: ${{ secrets.APPSTORE_KEY }}
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          key="$RUNNER_TEMP/AuthKey.p8"
+          printf '%s\n' "$KEY" > "$key"
+          auth=(-allowProvisioningUpdates -authenticationKeyPath "$key"
+                -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER")
+          xcodebuild -project MushafTV.xcodeproj -scheme MushafTV -configuration Release \
+            -destination 'generic/platform=tvOS' -archivePath "$RUNNER_TEMP/MushafTV.xcarchive" \
+            DEVELOPMENT_TEAM="$TEAM" CODE_SIGN_STYLE=Automatic "${auth[@]}" archive
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$TEAM</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/MushafTV.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" "${auth[@]}"
+          rm -f "$key"
+
+  screenshots:
+    if: inputs.screenshots
+    runs-on: xcode-27
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_27*.app | sort -V | tail -1)"
+      - name: Simulator build
+        working-directory: MushafTV
+        run: |
+          brew install xcodegen >/dev/null
+          ./make-project.sh
+          xcodebuild -project MushafTV.xcodeproj -scheme MushafTV -configuration Debug -sdk appletvsimulator \
+            -derivedDataPath "$RUNNER_TEMP/dd" CODE_SIGNING_ALLOWED=NO build | tail -5
+      - name: Capture
+        run: MushafTV/capture.sh "$RUNNER_TEMP/dd/Build/Products/Debug-appletvsimulator/Mushaf.app"
+      - name: Push to the tv-screenshots branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b tv-screenshots
+          git add ios-assets/appstore-assets/tv
+          git commit -m "Apple TV App Store screenshots"
+          git push -f origin tv-screenshots
