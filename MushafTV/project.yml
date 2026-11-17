@@ -21,6 +21,7 @@ targets:
       - path: ../MushafMac/Sources/MushafMac/AudioController.swift
       - path: ../MushafMac/Sources/MushafMac/Localization.swift
       - path: ../MushafMac/Sources/MushafMac/TextLibrary.swift
+      - path: ../MushafMac/Sources/MushafMac/PageWords.swift
     dependencies:
       - sdk: libsqlite3.tbd
     info:
