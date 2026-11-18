@@ -1,6 +1,6 @@
 #!/bin/zsh
-# Apple TV App Store screenshots from the app in the tvOS simulator (a Debug build: its -showMenu and -recite
-# launch arguments), in English, French and Arabic, into ../ios-assets/appstore-assets/tv/<lang>/.
+# Apple TV App Store screenshots from the app in the tvOS simulator (a Debug build: its -screen launch
+# argument), in English, French and Arabic, into ../ios-assets/appstore-assets/tv/<lang>/.
 set -uo pipefail
 cd "$(dirname "$0")"
 APP="$1"   # the simulator build's Mushaf.app
@@ -37,9 +37,14 @@ shot() {  # shot <file> <wait> <launch arguments...>
 
 for lang in en fr ar; do
   mkdir -p "$OUT/$lang"
-  shot "$OUT/$lang/01.png" 30 -language $lang -page 1 -night NO
-  shot "$OUT/$lang/02.png" 30 -language $lang -page 293 -night NO -recite YES
-  shot "$OUT/$lang/03.png" 25 -language $lang -page 50 -night YES
-  shot "$OUT/$lang/04.png" 20 -language $lang -page 1 -night NO -showMenu YES
+  rm -f "$OUT/$lang"/*.png
+  common=(-language $lang -tvHelpSeen YES -dualPage YES)
+  shot "$OUT/$lang/01.png" 30 "${common[@]}" -screen reader -page 2 -tvTheme Coloured
+  shot "$OUT/$lang/02.png" 35 "${common[@]}" -screen recite -page 50 -tvTheme Coloured
+  shot "$OUT/$lang/03.png" 30 "${common[@]}" -screen text -page 1 -tvTheme Coloured
+  shot "$OUT/$lang/04.png" 30 "${common[@]}" -screen panel -page 2 -tvTheme Coloured
+  shot "$OUT/$lang/05.png" 30 "${common[@]}" -screen reader -page 293 -tvTheme Night
+  shot "$OUT/$lang/06.png" 20 -language $lang -tvHelpSeen NO -screen help -tvTheme Coloured
+  shot "$OUT/$lang/07.png" 15 -language $lang -tvHelpSeen YES -screen dedication -page 1
 done
 xcrun simctl terminate "$UDID" $ID 2>/dev/null
