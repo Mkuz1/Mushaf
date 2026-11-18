@@ -16,6 +16,12 @@ targets:
     sources:
       - path: Sources
       - path: Assets.xcassets
+      - path: ../flutter_app/assets/fonts/Amiri-Regular.ttf
+        buildPhase: resources
+      - path: ../flutter_app/assets/fonts/Amiri-Bold.ttf
+        buildPhase: resources
+      - path: ../flutter_app/assets/fonts/AmiriQuran-Regular.ttf
+        buildPhase: resources
       - path: ../MushafMac/Sources/MushafMac/Storage.swift
       - path: ../MushafMac/Sources/MushafMac/GlyphDB.swift
       - path: ../MushafMac/Sources/MushafMac/AudioController.swift
@@ -35,6 +41,7 @@ targets:
         UIBackgroundModes: [audio]
         UIRequiredDeviceCapabilities: [arm64]
         UIUserInterfaceStyle: Dark
+        UIAppFonts: [Amiri-Regular.ttf, Amiri-Bold.ttf, AmiriQuran-Regular.ttf]
     settings:
       base:
         PRODUCT_NAME: Mushaf
