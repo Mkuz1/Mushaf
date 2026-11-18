@@ -26,6 +26,8 @@ HERE = Path(__file__).resolve().parent
 failures = []
 # IOS (iPhone and iPad) or MAC_OS: set by --platform.
 PLATFORM = 'IOS'
+# --withdraw: take a version waiting for review back, to change it.
+WITHDRAW = False
 
 
 def token():
@@ -195,6 +197,21 @@ def price(api, app):
 @step('Version')
 def version(api, app, cfg):
     versions = api.get(f"/v1/apps/{app['id']}/appStoreVersions", **{'filter[platform]': PLATFORM, 'limit': 20})['data']
+    if WITHDRAW and not any(v['attributes']['appStoreState'] in ('PREPARE_FOR_SUBMISSION', 'DEVELOPER_REJECTED', 'REJECTED',
+                                                                  'METADATA_REJECTED', 'INVALID_BINARY') for v in versions):
+        # A version waiting for review can't change: take it back from App Review first (--withdraw).
+        subs = api.get('/v1/reviewSubmissions', **{'filter[app]': app['id'], 'filter[platform]': PLATFORM,
+                                                    'filter[state]': 'WAITING_FOR_REVIEW,IN_REVIEW'})['data']
+        for sub in subs:
+            api.patch(f"/v1/reviewSubmissions/{sub['id']}", {'data': {'type': 'reviewSubmissions', 'id': sub['id'],
+                                                                       'attributes': {'canceled': True}}})
+            print(f"   withdrew the submission from App Review ({sub['attributes'].get('state')})")
+        for _ in range(30):
+            time.sleep(6)
+            versions = api.get(f"/v1/apps/{app['id']}/appStoreVersions",
+                               **{'filter[platform]': PLATFORM, 'limit': 20})['data']
+            if any(v['attributes']['appStoreState'] == 'DEVELOPER_REJECTED' for v in versions):
+                break
     editable = [v for v in versions if v['attributes']['appStoreState'] in
                 ('PREPARE_FOR_SUBMISSION', 'DEVELOPER_REJECTED', 'REJECTED', 'METADATA_REJECTED',
                  'INVALID_BINARY')]
@@ -416,6 +433,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--submit', action='store_true', help='also submit the version for review')
     ap.add_argument('--copyright', default='')
+    ap.add_argument('--withdraw', action='store_true', help='take a version waiting for review back first')
     ap.add_argument('--platform', default='IOS', choices=['IOS', 'MAC_OS', 'TV_OS'])
     ap.add_argument('--submit-only', action='store_true', help='only (re)submit: change nothing else')
     args = ap.parse_args()
@@ -423,8 +441,9 @@ def main():
     cfg, meta = listing['common'], listing['locales']
     if args.copyright:
         cfg['copyright'] = args.copyright
-    global PLATFORM
+    global PLATFORM, WITHDRAW
     PLATFORM = args.platform
+    WITHDRAW = args.withdraw
     print(f'Platform: {PLATFORM}')
     api = Api()
     app = find_app(api, cfg['bundleId'])
