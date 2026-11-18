@@ -88,6 +88,22 @@ struct IconButton: View {
     }
 }
 
+extension View {
+    /// A block of Arabic (or other right-to-left) text: aligned to the right edge in any interface language.
+    func rightAligned() -> some View {
+        multilineTextAlignment(.trailing)
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .environment(\.layoutDirection, .leftToRight)
+    }
+
+    /// A block of text aligned to the start of its own language: right for Arabic, left otherwise.
+    func aligned(rtl: Bool) -> some View {
+        multilineTextAlignment(rtl ? .trailing : .leading)
+            .frame(maxWidth: .infinity, alignment: rtl ? .trailing : .leading)
+            .environment(\.layoutDirection, .leftToRight)
+    }
+}
+
 /// No focus effect at all: for the pages, which show their own focus.
 struct BareButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View { configuration.label }

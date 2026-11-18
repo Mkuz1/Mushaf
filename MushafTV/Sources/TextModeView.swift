@@ -82,28 +82,25 @@ struct TVTextModeView: View {
         return Button { model.recite(from: key) } label: {
             VStack(alignment: .leading, spacing: 10) {
                 Text(key.description).font(.system(size: 18, weight: .semibold).monospacedDigit()).foregroundStyle(.secondary)
+                    .aligned(rtl: Localizer.shared.language == .arabic)
                 if showArabic {
                     Text(model.text.text(Edition.arabic.id, key) ?? "…")
                         .font(TV.quran(38))
                         .lineSpacing(10)
-                        .multilineTextAlignment(.trailing)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                        .environment(\.layoutDirection, .rightToLeft)
+                        .rightAligned()
                 }
                 if showTranslation {
                     Text(model.text.text(model.translationID, key) ?? "…")
                         .font(translationRTL ? TV.arabic(28) : .system(size: 26))
                         .lineSpacing(5)
-                        .multilineTextAlignment(translationRTL ? .trailing : .leading)
-                        .frame(maxWidth: .infinity, alignment: translationRTL ? .trailing : .leading)
+                        .aligned(rtl: translationRTL)
                 }
                 if model.showTafsirInText, let tafsir = model.text.text(model.tafsirID, key) {
                     Text(tafsir)
                         .font(tafsirRTL ? TV.arabic(25) : .system(size: 22))
                         .foregroundStyle(.secondary)
                         .lineSpacing(4)
-                        .multilineTextAlignment(tafsirRTL ? .trailing : .leading)
-                        .frame(maxWidth: .infinity, alignment: tafsirRTL ? .trailing : .leading)
+                        .aligned(rtl: tafsirRTL)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
