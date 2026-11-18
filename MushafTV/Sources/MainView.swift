@@ -47,6 +47,10 @@ struct MainView: View {
                 }
             }
         }
+        // The whole screen (TVs no longer overscan): bigger pages than inside tvOS's safe margins.
+        .padding(.top, model.fullScreen ? 0 : 24)
+        .padding(.horizontal, model.fullScreen ? 0 : 30)
+        .ignoresSafeArea()
         .background(TV.surface.ignoresSafeArea())
         .onPlayPauseCommand { model.togglePlay() }
         .onChange(of: model.audio.current) { _, _ in model.recitationMoved() }
@@ -247,11 +251,13 @@ struct SidebarView: View {
                         .frame(width: 48, height: 48)
                         .overlay(Circle().strokeBorder(lineWidth: 1.5))
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(s.englishName).font(.system(size: 25, weight: .semibold)).lineLimit(1)
-                        Text(meta(s)).font(.system(size: 18)).foregroundStyle(.secondary).lineLimit(1)
+                        Text(s.englishName).font(.system(size: 24, weight: .semibold)).lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                        Text(meta(s)).font(.system(size: 17)).foregroundStyle(.secondary).lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer(minLength: 6)
-                    Text(s.name).font(TV.arabic(27)).lineLimit(1)
+                    Text(s.name).font(TV.arabic(24)).lineLimit(1).fixedSize()
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -377,8 +383,9 @@ struct DockView: View {
             }
             .buttonStyle(FocusStyle(cornerRadius: 34, fill: TV.surfaceHighest))
         }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 30)
+        .padding(.top, 10)
+        .padding(.bottom, 26)
         .background(TV.surfaceHigh)
         .focusSection()
     }
@@ -434,10 +441,8 @@ struct VersePanel: View {
                             Text(arabic)
                                 .font(TV.quran(36))
                                 .foregroundStyle(TV.onSurface)
-                                .multilineTextAlignment(.trailing)
                                 .lineSpacing(10)
-                                .frame(maxWidth: .infinity, alignment: .trailing)
-                                .environment(\.layoutDirection, .rightToLeft)
+                                .rightAligned()
                         }
                         let id = model.panelText == .tafsir ? model.tafsirID : model.translationID
                         if let passage = model.text.text(id, key) {
@@ -447,9 +452,7 @@ struct VersePanel: View {
                                     Text(item.element)
                                         .font(Edition.named(id).isRTL ? TV.arabic(28) : .system(size: 25))
                                         .lineSpacing(6)
-                                        .multilineTextAlignment(Edition.named(id).isRTL ? .trailing : .leading)
-                                        .frame(maxWidth: .infinity,
-                                               alignment: Edition.named(id).isRTL ? .trailing : .leading)
+                                        .aligned(rtl: Edition.named(id).isRTL)
                                 }
                                 .buttonStyle(FocusStyle(cornerRadius: 12, padding: EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12),
                                                         fill: TV.surfaceHigh.opacity(0.5)))

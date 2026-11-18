@@ -105,8 +105,8 @@ struct DedicationView: View {
     }
 
     private var resumeDescription: String {
-        let ayah = model.lastAyah
-        let sura = ayah?.sura ?? model.firstAyah(on: model.page)?.sura
+        let ayah = model.lastAyah.flatMap { key in model.db?.page(of: key) == model.page ? key : nil }
+        let sura = model.firstAyah(on: model.page)?.sura ?? ayah?.sura
         return ([sura.map { model.surahName($0) }, t("Page %d", model.page), ayah.map { t("Ayah %d", $0.ayah) }]
             .compactMap { $0 }).joined(separator: " · ")
     }

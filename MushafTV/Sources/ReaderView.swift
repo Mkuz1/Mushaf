@@ -18,9 +18,7 @@ struct ReaderView: View {
             }
             .environment(\.layoutDirection, .leftToRight)
             .padding(.horizontal, 28)
-            .padding(.top, 22)
-            .padding(.bottom, focused ? 64 : 22)
-            .animation(.easeOut(duration: 0.2), value: focused)
+            .padding(.vertical, model.fullScreen ? 30 : 18)
         }
         .overlay {
             if focused {
@@ -34,7 +32,7 @@ struct ReaderView: View {
                     .foregroundStyle(TV.onSurface)
                     .padding(.horizontal, 24).padding(.vertical, 8)
                     .background(TV.surface.opacity(0.88), in: Capsule())
-                    .padding(.bottom, 12)
+                    .padding(.bottom, 6)
             }
         }
     }
@@ -59,10 +57,12 @@ struct TVPageView: View {
     var body: some View {
         framed(content)
             .overlay(alignment: outerEdgeIsRight ? .topTrailing : .topLeading) {
-                Ribbon(marked: model.bookmarks.contains(page))
-                    .frame(width: 26, height: 64)
-                    .offset(y: -4)
-                    .padding(.horizontal, 22)
+                if model.bookmarks.contains(page) || model.style == .coloured {
+                    Ribbon(marked: model.bookmarks.contains(page))
+                        .frame(width: 26, height: 64)
+                        .offset(y: -4)
+                        .padding(.horizontal, 22)
+                }
             }
             .task(id: "\(page)-\(model.style.rawValue)-\(model.status == .ready)") { await model.loadWords(page) }
     }
