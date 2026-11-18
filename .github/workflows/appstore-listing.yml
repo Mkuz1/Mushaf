@@ -31,6 +31,10 @@ on:
         description: Also submit the version to App Review
         type: boolean
         default: false
+      withdraw:
+        description: First take the version back from App Review (to replace its build or texts)
+        type: boolean
+        default: false
       submit_only:
         description: Only (re)submit to App Review, changing nothing else
         type: boolean
@@ -74,4 +78,5 @@ jobs:
           [ -n "$COPYRIGHT" ] && args+=(--copyright "$COPYRIGHT")
           [ "${{ inputs.submit }}" = "true" ] && args+=(--submit)
           [ "${{ inputs.submit_only }}" = "true" ] && args+=(--submit-only)
+          [ "${{ inputs.withdraw }}" = "true" ] && args+=(--withdraw)
           python ios-assets/appstore_listing.py "${args[@]}"
