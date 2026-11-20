@@ -264,7 +264,7 @@ private enum Strings {
         "Copy Image": ("Copier l'image", "نسخ الصورة"),
         "Save Image…": ("Enregistrer l'image…", "حفظ الصورة…"),
         "Check for Updates…": ("Rechercher des mises à jour…", "التحقق من التحديثات…"),
-        "Download Mus'haf": ("Télécharger Mus'haf", "تحميل المصحف"),
+        "Download Mushaf": ("Télécharger Mushaf", "تحميل المصحف"),
         "Android (APK)": ("Android (APK)", "أندرويد (APK)"),
         "Google Play": ("Google Play", "جوجل بلاي"),
         "Windows (installer)": ("Windows (installateur)", "ويندوز (مثبّت)"),

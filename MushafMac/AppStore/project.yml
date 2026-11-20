@@ -31,8 +31,8 @@ targets:
     info:
       path: Info.plist
       properties:
-        CFBundleName: Mus'haf
-        CFBundleDisplayName: Mus'haf
+        CFBundleName: Mushaf
+        CFBundleDisplayName: Mushaf — Madinah Quran
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         ATSApplicationFontsPath: Fonts

@@ -528,7 +528,7 @@ class _Poster extends StatelessWidget {
     final line = Text(caption.$2,
         textAlign: wide ? TextAlign.start : TextAlign.center,
         style: TextStyle(fontFamily: family, fontFamilyFallback: const ['Roboto'], fontSize: wide ? 50 : 40, color: Colors.white.withValues(alpha: 0.86), height: 1.35));
-    final mark = Text(_arabic ? 'مصحف · صدقة جارية' : "Mus'haf · مصحف",
+    final mark = Text(_arabic ? 'مصحف · صدقة جارية' : "Mushaf · مصحف",
         style: TextStyle(fontFamily: 'Amiri', fontSize: wide ? 40 : 34, color: _gold.withValues(alpha: 0.75)));
     return DecoratedBox(
       decoration: const BoxDecoration(

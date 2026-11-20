@@ -89,7 +89,7 @@ class QuranReaderApp extends StatelessWidget {
     return ListenableBuilder(
       listenable: Localizer.shared,
       builder: (context, _) => MaterialApp(
-        title: "Mus'haf",
+        title: "Mushaf — Madinah Quran",
         debugShowCheckedModeBanner: false,
         // The same dark green menus and bars on every device, whatever its light or dark setting (the mushaf
         // page itself still follows that setting: see invertsInk).

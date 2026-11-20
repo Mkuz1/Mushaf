@@ -1,0 +1,14 @@
+{
+  "package": "com.mushaf.myapp",
+  "title": "Mushaf — Madinah Quran",
+  "images": {
+    "icon": "icon-512.png",
+    "featureGraphic": "feature-graphic-1024x500.png",
+    "tvBanner": "tv/tv-banner-1280x720.png"
+  },
+  "releaseNotes": {
+    "en-US": "• A new name: Mushaf — Madinah Quran, and a new icon\n• Friday reminder to read Surat Al-Kahf, even with the app closed\n• Colours by subject: each passage of the mushaf in its own colour\n• The same dark green menus on every device\n• Android TV: the whole app with the remote\n• Bigger pages on tablets; better layout on folding phones\n• 26 reciters (Salah Bukhatir ★ by default) with repeat for memorisation",
+    "fr-FR": "• Un nouveau nom : Mushaf — Madinah Quran, et une nouvelle icône\n• Rappel du vendredi pour lire la sourate Al-Kahf, même application fermée\n• Couleurs par thème : chaque passage du mushaf dans sa couleur\n• Les mêmes menus vert foncé sur tous les appareils\n• Android TV : toute l'application à la télécommande\n• Pages plus grandes sur tablette ; meilleure mise en page sur téléphones pliables\n• 26 récitateurs (Salah Bukhatir ★ par défaut) avec répétition",
+    "ar": "• اسم جديد: Mushaf — Madinah Quran، وأيقونة جديدة\n• تذكير يوم الجمعة بقراءة سورة الكهف، حتى والتطبيق مغلق\n• ألوان المواضيع: كل مقطع من المصحف بلون خاص\n• نفس القوائم الخضراء الداكنة على كل الأجهزة\n• Android TV: التطبيق كله بجهاز التحكم\n• صفحات أكبر على الأجهزة اللوحية وتخطيط أفضل على الهواتف القابلة للطي\n• ٢٦ قارئًا (صلاح بو خاطر ★ افتراضيًا) مع التكرار للحفظ"
+  }
+}

@@ -4,10 +4,10 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 ./make-app.sh
-STAGE="$(mktemp -d)/Mus'haf"
+STAGE="$(mktemp -d)/Mushaf"
 mkdir -p "$STAGE"
-cp -R build/Mushaf.app "$STAGE/Mus'haf.app"
+cp -R build/Mushaf.app "$STAGE/Mushaf.app"
 ln -s /Applications "$STAGE/Applications"
 rm -f build/Mushaf.dmg
-hdiutil create -volname "Mus'haf" -srcfolder "$STAGE" -fs HFS+ -format UDZO -ov build/Mushaf.dmg >/dev/null
+hdiutil create -volname "Mushaf" -srcfolder "$STAGE" -fs HFS+ -format UDZO -ov build/Mushaf.dmg >/dev/null
 echo "Built $PWD/build/Mushaf.dmg ($(du -h build/Mushaf.dmg | cut -f1))"

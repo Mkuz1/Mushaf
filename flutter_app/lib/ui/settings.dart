@@ -225,7 +225,7 @@ class _Settings extends StatelessWidget {
                 onTap: () => _import(context),
               ),
               if (!appStoreBuild) ...[
-                section(tr('Download Mus\'haf')),
+                section(tr('Download Mushaf')),
                 for (final (icon, label, url) in [
                   (Icons.android, 'Android (APK)', Remote.latestDownload('Mushaf-Android.apk')),
                   (Icons.shop_outlined, 'Google Play', Remote.playStore),

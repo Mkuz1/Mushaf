@@ -257,7 +257,7 @@ jobs:
             sed -i "s|^### Install\$|### Install\n_No new $missing build in this release: those apps stay on the previous version for now._\n|" "$RUNNER_TEMP/notes.md"
           fi
           gh release create "v$V" dist/* --target "$GITHUB_SHA" --latest \
-            --title "Mus'haf $V" --notes-file "$RUNNER_TEMP/notes.md"
+            --title "Mushaf — Madinah Quran $V" --notes-file "$RUNNER_TEMP/notes.md"
       - name: Publish to the public releases repo
         env:
           RELEASES_TOKEN: ${{ secrets.MUSHAF_RELEASES_TOKEN }}
@@ -285,7 +285,7 @@ jobs:
               -e "s/Mushaf-$V\.dmg/Mushaf-macOS.dmg/g" -e "s/Mushaf-$V-Windows-Portable/Mushaf-Windows-Portable/g" \
               -e "s/Mushaf-$V-iOS\.ipa/Mushaf-iOS.ipa/g" "$RUNNER_TEMP/notes.md" > "$RUNNER_TEMP/public-notes.md"
           GH_TOKEN="$RELEASES_TOKEN" gh release create "v$V" pub/* \
-            --repo Mkuz1/Mushaf-releases --latest --title "Mus'haf $V" --notes-file "$RUNNER_TEMP/public-notes.md"
+            --repo Mkuz1/Mushaf-releases --latest --title "Mushaf — Madinah Quran $V" --notes-file "$RUNNER_TEMP/public-notes.md"
 
   # The app on an Android emulator, online like a phone (Quran Reader HD's device test).
   # Informational: on this repository's runners the emulator has not been able to boot,

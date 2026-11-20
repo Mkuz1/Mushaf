@@ -1,8 +1,13 @@
 **صدقة جارية — Sadaqa Jariyah on behalf of Mohamad Koussa and Dima Ghannoum and their families.**
 
-Mus'haf: the Madani mushaf with verse-by-verse recitation (26 reciters), translations, tafsir, notes, bookmarks and search, in Arabic, English and French — for **Android (phones, tablets, foldables and TV), iPhone and iPad, Windows and macOS**. The same app as Quran Reader HD 1.3.
+Mushaf — Madinah Quran: the Madani mushaf with verse-by-verse recitation (26 reciters), translations, tafsir, notes, bookmarks and search, in Arabic, English and French — for **Android (phones, tablets, foldables and TV), iPhone and iPad, Windows and macOS**. The same app as Quran Reader HD 1.3.
 
 ### New in {{VERSION}}
+- **A new name: Mushaf — Madinah Quran.** It is the app's name in the stores, the Windows Start menu and the window titles; under the icon on phones and tablets it reads **Mushaf**. Nothing else changes: your place, bookmarks, notes and settings stay as they were.
+- **iPhone Duo and other folding phones:** on the unfolded screen the player keeps clear of the side status bar.
+- **Coming to the App Store** for iPhone, iPad, Mac and Apple TV (with a new Apple TV app, worked entirely with the Siri Remote).
+
+### In 1.10.12
 - **A new app icon** on every platform: «القرآن» in gold calligraphy over an open mushaf, with a crescent and stars, in a gold frame on deep green. Also on the Android TV banner and the website.
 
 ### In 1.10.11

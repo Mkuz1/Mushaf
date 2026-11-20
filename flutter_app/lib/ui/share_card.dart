@@ -267,7 +267,7 @@ class AyahCard extends StatelessWidget {
                       child: Image.asset('assets/AppIcon.png', width: 22, height: 22),
                     ),
                     const SizedBox(width: 7),
-                    Text("Mus'haf",
+                    Text("Mushaf",
                         style: TextStyle(
                             fontFamily: arabicFont,
                             fontSize: 13.5,

@@ -241,7 +241,7 @@ private struct DisplayButton: View {
                             .disabled(!model.reminder.enabled)
                     }
                     #if !APPSTORE
-                    Section(tr("Download Mus'haf")) {
+                    Section(tr("Download Mushaf")) {
                         ForEach(Remote.downloads.indices, id: \.self) { i in
                             let d = Remote.downloads[i]
                             Link(destination: d.url) { Label(tr(d.title), systemImage: d.icon) }

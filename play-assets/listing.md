@@ -1,7 +1,7 @@
-# Play Store listing — Mus'haf
+# Play Store listing — Mushaf — Madinah Quran
 
 **App name (max 30):**
-Mus'haf — Quran Reader
+Mushaf — Madinah Quran
 
 **Short description (max 80):**
 Madinah Mushaf reader — RTL pages, night mode, index, offline, Arabic & English.

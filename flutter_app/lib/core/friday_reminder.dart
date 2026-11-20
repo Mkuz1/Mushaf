@@ -54,7 +54,7 @@ class FridayReminder extends ChangeNotifier {
           macOS: DarwinInitializationSettings(
               requestAlertPermission: false, requestBadgePermission: false, requestSoundPermission: false),
           windows: WindowsInitializationSettings(
-            appName: "Mus'haf",
+            appName: "Mushaf — Madinah Quran",
             appUserModelId: 'MKoussa.Mushaf.App',
             guid: '4d3c9a52-8f1e-4b7a-9c61-2f5e0d7b8a14',
           ),
