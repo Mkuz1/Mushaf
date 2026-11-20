@@ -34,9 +34,11 @@ def main():
         json.loads(os.environ['PLAY_SERVICE_ACCOUNT_JSON']), scopes=['https://www.googleapis.com/auth/androidpublisher'])
     creds.refresh(Request())
 
-    def call(method, url, **kw):
+    def call(method, url, ok=(), **kw):
         headers = {'Authorization': f'Bearer {creds.token}', **kw.pop('headers', {})}
         r = requests.request(method, url, headers=headers, timeout=900, **kw)
+        if r.status_code >= 400 and any(s in r.text for s in ok):
+            return {'_refused': r.text}
         if r.status_code >= 400:
             sys.exit(f"{method} {url.split(pkg)[-1]} -> {r.status_code}: {r.text[:1500]}")
         return r.json() if r.content else {}
@@ -47,9 +49,17 @@ def main():
     if args.aab:
         with open(args.aab, 'rb') as f:
             bundle = call('POST', f'{upload}/edits/{edit}/bundles?uploadType=media', data=f,
-                          headers={'Content-Type': 'application/octet-stream'})
-        code = bundle['versionCode']
-        print(f'Bundle uploaded: version code {code}')
+                          headers={'Content-Type': 'application/octet-stream'}, ok=('has already been used',))
+        if '_refused' in bundle:
+            # Uploaded by an earlier run: release the bundle Play already has (the newest one).
+            bundles = call('GET', f'{api}/edits/{edit}/bundles').get('bundles', [])
+            if not bundles:
+                sys.exit('Play says the version code is used, but lists no bundle')
+            code = max(b['versionCode'] for b in bundles)
+            print(f'Bundle already on Play: version code {code}')
+        else:
+            code = bundle['versionCode']
+            print(f'Bundle uploaded: version code {code}')
         release = {'name': args.version_name or str(code), 'versionCodes': [str(code)],
                    'releaseNotes': [{'language': l, 'text': t} for l, t in cfg['releaseNotes'].items()]}
         if args.rollout < 1:
