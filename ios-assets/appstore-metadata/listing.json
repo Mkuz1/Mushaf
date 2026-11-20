@@ -2,7 +2,7 @@
   "common": {
     "bundleId": "com.kousa.mushaf",
     "version": "1.10.13",
-    "build": "32",
+    "build": "33",
     "locales": {
       "ar": "ar-SA",
       "en": "en-US",
