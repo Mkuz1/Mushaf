@@ -158,7 +158,7 @@ void main() {
     tester.state<ScaffoldState>(find.byType(Scaffold).first).closeDrawer();
     await settle(tester);
 
-    // 6. Settings, at Download Mus'haf.
+    // 6. Settings, at Download Mushaf.
     showSettings(tester.element(find.byType(Home)));
     await settle(tester);
     await tester.scrollUntilVisible(find.text(tr('All releases on GitHub')), 200,

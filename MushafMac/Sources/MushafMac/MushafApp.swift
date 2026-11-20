@@ -18,7 +18,7 @@ struct MushafApp: App {
     @State private var model = AppModel()
 
     var body: some Scene {
-        WindowGroup("Mushaf") {
+        WindowGroup("Mushaf — Madinah Quran") {
             ContentView()
                 .environment(model)
                 .handlesExternalEvents(preferring: ["*"], allowing: ["*"])
@@ -60,7 +60,7 @@ struct AppCommands: Commands {
             // The Mac App Store build updates through the App Store and links to no other downloads.
             #if !APPSTORE
             Button(tr("Check for Updates…")) { Task { await model.updates.check(manual: true) } }
-            Menu(tr("Download Mus'haf")) {
+            Menu(tr("Download Mushaf")) {
                 ForEach(Remote.downloads.indices, id: \.self) { i in
                     let d = Remote.downloads[i]
                     Button(tr(d.title)) { NSWorkspace.shared.open(d.url) }

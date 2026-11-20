@@ -38,8 +38,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>CFBundleName</key><string>Mus'haf</string>
-  <key>CFBundleDisplayName</key><string>Mus'haf</string>
+  <key>CFBundleName</key><string>Mushaf</string>
+  <key>CFBundleDisplayName</key><string>Mushaf — Madinah Quran</string>
   <key>CFBundleIdentifier</key><string>com.mushaf.mac</string>
   <key>CFBundleExecutable</key><string>Mushaf</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>

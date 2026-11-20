@@ -1,6 +1,6 @@
 {
-  "name": "المصحف الشريف — Mus'haf",
-  "short_name": "مصحف",
+  "name": "Mushaf — Madinah Quran",
+  "short_name": "Mushaf",
   "description": "The Madinah Mushaf, beautifully simple — read in your browser, works offline.",
   "start_url": "reader.html",
   "scope": "./",

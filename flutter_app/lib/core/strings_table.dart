@@ -213,8 +213,8 @@ const Map<String, (String, String)> stringsTable = {
   'Continue Listening': ('Continuer l\'écoute', 'متابعة الاستماع'),
   'Start from the Beginning': ('Commencer depuis le début', 'البدء من البداية'),
   'Tap the page to show the controls.': ('Touchez la page pour afficher les commandes.', 'انقر على الصفحة لإظهار أدوات التحكم.'),
-  // Settings ▸ Download Mus'haf
-  'Download Mus\'haf': ('Télécharger Mus\'haf', 'تحميل المصحف'),
+  // Settings ▸ Download Mushaf
+  'Download Mushaf': ('Télécharger Mushaf', 'تحميل المصحف'),
   'Android (APK)': ('Android (APK)', 'أندرويد (APK)'),
   'Google Play': ('Google Play', 'جوجل بلاي'),
   'Windows (installer)': ('Windows (installateur)', 'ويندوز (مثبّت)'),

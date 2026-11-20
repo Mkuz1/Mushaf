@@ -15,10 +15,10 @@
 [Setup]
 ; Keep this AppId: installing a newer version over an older one relies on it.
 AppId={{6B0E3B52-8C1E-4A9C-9E57-2F4D3C7A9D10}
-AppName=Mus'haf
+AppName=Mushaf - Madinah Quran
 AppVersion={#AppVersion}
-AppVerName=Mus'haf {#AppVersion}
-AppPublisher=Mus'haf
+AppVerName=Mushaf - Madinah Quran {#AppVersion}
+AppPublisher=Mushaf
 AppPublisherURL=https://mushafapp.com
 AppSupportURL=https://mushafapp.com
 AppUpdatesURL=https://github.com/Mkuz1/Mushaf-releases/releases
@@ -30,7 +30,7 @@ OutputDir={#OutputDir}
 OutputBaseFilename=Mushaf-{#AppVersion}-Setup
 SetupIconFile=runner\resources\app_icon.ico
 UninstallDisplayIcon={app}\Mushaf.exe
-UninstallDisplayName=Mus'haf
+UninstallDisplayName=Mushaf - Madinah Quran
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
@@ -51,8 +51,13 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\Mus'haf"; Filename: "{app}\Mushaf.exe"
-Name: "{autodesktop}\Mus'haf"; Filename: "{app}\Mushaf.exe"; Tasks: desktopicon
+Name: "{autoprograms}\Mushaf - Madinah Quran"; Filename: "{app}\Mushaf.exe"
+Name: "{autodesktop}\Mushaf - Madinah Quran"; Filename: "{app}\Mushaf.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\Mushaf.exe"; Description: "{cm:LaunchProgram,Mus'haf}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\Mushaf.exe"; Description: "{cm:LaunchProgram,Mushaf}"; Flags: nowait postinstall skipifsilent
+
+[InstallDelete]
+; The shortcuts of versions before the app was named "Mushaf - Madinah Quran".
+Type: files; Name: "{autoprograms}\Mus'haf.lnk"
+Type: files; Name: "{autodesktop}\Mus'haf.lnk"

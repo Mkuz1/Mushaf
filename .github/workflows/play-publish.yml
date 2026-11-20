@@ -1,0 +1,66 @@
+# Publishes Mushaf on Google Play (play-assets/play_publish.py): the app bundle from the latest successful Release
+# run on main, to production by default, with the release notes, store title, icon, feature graphic and TV banner
+# of play-assets/play-release.json.
+#
+# Needs the repository secret PLAY_SERVICE_ACCOUNT_JSON: the JSON key of a Google Cloud service account that has
+# the Google Play Android Developer API enabled and is invited in Play Console (Users and permissions) with
+# release and store-listing rights. See play-assets/PLAY_RELEASE.md.
+name: Google Play
+
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: Play track
+        type: choice
+        options: [production, beta, alpha, internal]
+        default: production
+      rollout:
+        description: Share of users for a staged rollout (1 = everyone)
+        default: '1'
+      listing_only:
+        description: Only update the store listing (title and images), no new release
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Play key
+        env:
+          KEY: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::error::Add the PLAY_SERVICE_ACCOUNT_JSON secret first (see play-assets/PLAY_RELEASE.md)"; exit 1
+          fi
+      - name: The app bundle of the latest release
+        if: ${{ !inputs.listing_only }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run=$(gh run list -R "$GITHUB_REPOSITORY" --workflow release.yml --branch main --status success \
+                --limit 1 --json databaseId -q '.[0].databaseId')
+          echo "Release run: $run"
+          gh run download "$run" -R "$GITHUB_REPOSITORY" -n play-bundle -D bundle
+          ls -la bundle
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install google-auth requests
+      - name: Publish
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          args=(--track "${{ inputs.track }}" --rollout "${{ inputs.rollout }}")
+          if [ "${{ inputs.listing_only }}" != "true" ]; then
+            aab=$(ls bundle/*.aab | head -1)
+            name=$(basename "$aab" .aab); name=${name#Mushaf-}
+            args+=(--aab "$aab" --version-name "$name")
+          fi
+          python play-assets/play_publish.py "${args[@]}"

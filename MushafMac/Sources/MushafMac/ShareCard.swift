@@ -82,7 +82,7 @@ struct AyahCard: View {
                 Image(nsImage: NSApp.applicationIconImage)
                     .resizable()
                     .frame(width: 24, height: 24)
-                Text("Mus'haf")
+                Text("Mushaf")
                     .font(.system(size: 13.5, weight: .bold, design: .serif))
                     .foregroundStyle(ink.opacity(0.8))
             }
