@@ -179,6 +179,47 @@ AGE_NO = ('gambling', 'unrestrictedWebAccess', 'lootBox', 'messagingAndChat', 'p
           'userGeneratedContent', 'advertising', 'healthOrWellnessTopics', 'socialMedia')
 
 
+# China mainland requires a publishing licence for book content (the Quran): the app is offered everywhere else.
+EXCLUDED_TERRITORIES = {'CHN'}
+
+
+@step('Availability: every territory except China mainland')
+def availability(api, app):
+    try:
+        current = api.get(f"/v1/apps/{app['id']}/appAvailabilityV2")['data']
+    except ApiError:
+        current = None
+    if current:
+        changed = 0
+        url = f"/v2/appAvailabilities/{current['id']}/territoryAvailabilities"
+        params = {'limit': 200, 'include': 'territory'}
+        while url:
+            page = api.call('GET', url, params=params)
+            for ta in page['data']:
+                territory = ta['relationships']['territory']['data']['id']
+                want = territory not in EXCLUDED_TERRITORIES
+                if ta['attributes'].get('available') != want:
+                    api.patch(f"/v1/territoryAvailabilities/{ta['id']}",
+                              {'data': {'type': 'territoryAvailabilities', 'id': ta['id'],
+                                        'attributes': {'available': want}}})
+                    changed += 1
+            nxt = page.get('links', {}).get('next')
+            url, params = (nxt.replace(API, ''), None) if nxt else (None, None)
+        print(f'   {changed} territories changed')
+        return
+    territories = [t['id'] for t in api.get('/v1/territories', limit=200)['data']]
+    included = [{'type': 'territoryAvailabilities', 'id': f'${{{t}}}',
+                 'attributes': {'available': t not in EXCLUDED_TERRITORIES},
+                 'relationships': {'territory': rel('territories', t)}} for t in territories]
+    api.call('POST', '/v2/appAvailabilities', {
+        'data': {'type': 'appAvailabilities', 'attributes': {'availableInNewTerritories': True},
+                 'relationships': {'app': rel('apps', app['id']),
+                                   'territoryAvailabilities': {'data': [{'type': i['type'], 'id': i['id']}
+                                                                        for i in included]}}},
+        'included': included})
+    print(f'   {len(territories) - len(EXCLUDED_TERRITORIES)} territories')
+
+
 @step('Price: free')
 def price(api, app):
     points = api.get(f"/v1/apps/{app['id']}/appPricePoints",
@@ -458,6 +499,7 @@ def main():
     content_rights(api, app)
     if info:
         age_rating(api, info)
+    availability(api, app)
     price(api, app)
     ver = version(api, app, cfg)
     if not ver:

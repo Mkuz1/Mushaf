@@ -38,7 +38,6 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         ITSAppUsesNonExemptEncryption: false
-        UIBackgroundModes: [audio]
         UIRequiredDeviceCapabilities: [arm64]
         UIUserInterfaceStyle: Dark
         UIAppFonts: [Amiri-Regular.ttf, Amiri-Bold.ttf, AmiriQuran-Regular.ttf]
