@@ -6,7 +6,7 @@
 <title>Mushaf — Madinah Quran · Read the Madinah Mushaf online and in the app</title>
 <meta name="description" content="The Madinah Mushaf, all 604 printed pages, with verse by verse recitation by 26 reciters, translation and tafsir in English, French and Arabic. Free, with no ads and no account. Android, Google TV, iPhone, iPad, Mac, Apple TV, Windows and the web.">
 <link rel="canonical" href="https://www.mushafapp.com/">
-<meta name="theme-color" content="#131209">
+<meta name="theme-color" content="#062A20">
 <link rel="icon" href="assets/icon.png">
 <link rel="apple-touch-icon" href="assets/icon.png">
 <!-- Open Graph (Facebook, WhatsApp, Telegram, LinkedIn…) -->
@@ -68,8 +68,8 @@
      One typeface (Manrope; Amiri for Arabic), flat warm black, gold as the single accent. */
   :root{
     color-scheme:dark;
-    --bg:#131209; --surface:#1F1F1F; --surface-2:#272727; --line:#313131;
-    --text:#F2EEE4; --muted:#A7A296; --gold:#D9B865; --gold-hover:#E6C97E; --gold-ink:#131209;
+    --bg:#062A20; --surface:#0B3428; --surface-2:#0E3D31; --line:#14513F;
+    --text:#F3EAD3; --muted:#AFC0B4; --gold:#DBB86B; --gold-hover:#E7C987; --gold-ink:#031C14;
     --ok:#8FD3A8; --err:#E59A8C;
     --font:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
     --arabic:'Amiri','Geeza Pro','Noto Naskh Arabic',serif;
@@ -78,7 +78,7 @@
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:24px;-webkit-font-smoothing:antialiased}
+  body{margin:0;background:linear-gradient(180deg,#083326 0,#062A20 900px,#031C14 100%) var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:24px;-webkit-font-smoothing:antialiased}
   html[lang="ar"] body{font-family:var(--arabic);font-size:18px;line-height:28px}
   a{color:inherit}
   img{max-width:100%;height:auto;display:block}
@@ -115,7 +115,7 @@
   body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
   .nav-shell{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;padding:16px 16px 0}
   nav.bar{margin:0 auto;width:fit-content;max-width:100%;display:flex;align-items:center;gap:24px;padding:8px;padding-inline-start:16px;
-    border-radius:var(--r-md);background:rgba(31,31,31,.72);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line)}
+    border-radius:var(--r-md);background:rgba(8,51,38,.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line)}
   .brand{display:flex;align-items:center;gap:8px;text-decoration:none;font-weight:600}
   .brand img{width:32px;height:32px;border-radius:var(--r-sm)}
   .nav-links{display:flex;gap:16px;font-size:14px;line-height:20px;font-weight:500}
@@ -130,8 +130,8 @@
   /* Hero */
   .hero{padding-block:96px 64px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:48px;align-items:center}
   .eyebrow{display:flex;align-items:center;gap:8px;color:var(--gold);margin-bottom:24px}
-  .hero h1{max-width:680px;background:linear-gradient(90deg,#FFFFFF,#9B9B9B);-webkit-background-clip:text;background-clip:text;color:transparent;padding-bottom:4px}
-  html[dir="rtl"] .hero h1{background:linear-gradient(270deg,#FFFFFF,#9B9B9B);-webkit-background-clip:text;background-clip:text}
+  .hero h1{max-width:680px;background:linear-gradient(90deg,#F8F3E8,#C9B98F);-webkit-background-clip:text;background-clip:text;color:transparent;padding-bottom:4px}
+  html[dir="rtl"] .hero h1{background:linear-gradient(270deg,#F8F3E8,#C9B98F);-webkit-background-clip:text;background-clip:text}
   .hero .lead{max-width:680px;margin-top:24px;color:var(--muted);font-size:18px;line-height:28px}
   html[lang="ar"] .hero .lead{font-size:20px;line-height:32px}
   .hero .actions{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-top:32px}
@@ -140,7 +140,7 @@
   .stage{position:relative;padding-bottom:48px}
   .stage .tablet{border-radius:var(--r-lg);border:1px solid var(--line);overflow:hidden;background:var(--surface)}
   .stage .tablet img{width:100%}
-  .stage .phone{position:absolute;inset-inline-end:-16px;bottom:0;width:30%;border-radius:24px;border:4px solid #000;box-shadow:0 24px 48px rgba(19,18,9,.9)}
+  .stage .phone{position:absolute;inset-inline-end:-16px;bottom:0;width:30%;border-radius:24px;border:4px solid #000;box-shadow:0 24px 48px rgba(3,28,20,.9)}
 
   /* Facts */
   .facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;padding-block:32px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
@@ -152,7 +152,7 @@
   .tagline{padding-block:96px}
   .tagline .big{max-width:880px;font-size:48px;line-height:48px;font-weight:600;letter-spacing:-0.02em}
   html[lang="ar"] .tagline .big{font-size:56px;line-height:88px;letter-spacing:0}
-  .tagline .w{color:rgba(242,238,228,.3);transition:color .5s var(--ease)}
+  .tagline .w{color:rgba(243,234,211,.28);transition:color .5s var(--ease)}
   .tagline .w.on{color:var(--text)}
   .tagline .w.gold.on{color:var(--gold)}
   .tagline .sub{margin-top:24px;color:var(--muted)}
@@ -256,6 +256,32 @@
     .brand span{display:none}
     .stage .phone{inset-inline-end:0}
   }
+
+  /* Dedication theme: the app's opening page. Emerald gradient, the gold star lattice, gold titles and gold edged cards. */
+  body{background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2764%27%20height%3D%2764%27%3E%3Cpath%20d%3D%27M-15.56%20-15.56H15.56V15.56H-15.56ZM0%20-22L22%200L0%2022L-22%200ZM48.44%20-15.56H79.56V15.56H48.44ZM64%20-22L86%200L64%2022L42%200ZM-15.56%2048.44H15.56V79.56H-15.56ZM0%2042L22%2064L0%2086L-22%2064ZM48.44%2048.44H79.56V79.56H48.44ZM64%2042L86%2064L64%2086L42%2064ZM16.44%2016.44H47.56V47.56H16.44ZM32%2010L54%2032L32%2054L10%2032Z%27%20fill%3D%27none%27%20stroke%3D%27%23DBB86B%27%20stroke-opacity%3D%27.10%27%20stroke-width%3D%271%27/%3E%3C/svg%3E") repeat, linear-gradient(180deg,#083326 0%,#062A20 45%,#031C14 100%) fixed, #031C14}
+  .bism{font-family:var(--arabic);font-size:30px;line-height:48px;color:rgba(219,184,107,.9);direction:rtl;margin-bottom:8px;width:fit-content}
+  .orn{display:flex;align-items:center;gap:10px;margin-bottom:24px;width:260px}
+  .orn i{flex:1;height:1px;background:rgba(219,184,107,.6)}
+  .orn b{width:8px;height:8px;background:var(--gold);transform:rotate(45deg)}
+  .hero h1,html[dir="rtl"] .hero h1{background:linear-gradient(90deg,#DBB86B,#FAE09E 50%,#DBB86B);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .heading-4{color:#F3EAD3}
+  .row .copy .caption-3,.eyebrow{color:#E7C987;letter-spacing:.2em}
+  .tagline .w.on{color:#F3EAD3}
+  .tagline .w.gold.on{background:linear-gradient(90deg,#DBB86B,#FAE09E,#DBB86B);-webkit-background-clip:text;background-clip:text;color:transparent}
+  nav.bar{background:rgba(6,42,32,.82);border-color:rgba(219,184,107,.35)}
+  .stage .tablet{border-color:rgba(219,184,107,.45)}
+  .step,.plat,.closing .box{background:rgba(8,51,38,.72);border:1px solid rgba(219,184,107,.28)}
+  .plat:hover{background:rgba(14,61,49,.9);border-color:rgba(219,184,107,.55)}
+  .plat.soon:hover{background:rgba(8,51,38,.72);border-color:rgba(219,184,107,.28)}
+  .closing .box{border-radius:32px;border-color:rgba(219,184,107,.5);text-align:center;grid-template-columns:minmax(0,1fr)!important;justify-items:center}
+  .closing .assure{justify-content:center}
+  .closing .box p{margin-left:auto;margin-right:auto}
+  .step .n,.plat .ic{background:rgba(219,184,107,.12);color:var(--gold)}
+  .btn-primary{background:linear-gradient(180deg,#E7C987,#D6B061);border-radius:999px;box-shadow:0 0 0 3px rgba(243,234,211,.18)}
+  .btn-primary:hover{background:linear-gradient(180deg,#F0D598,#DDB86B)}
+  .facts,.steps-sec,.faq,.contact,footer{border-color:rgba(219,184,107,.22)}
+  .contact input,.contact textarea{background:rgba(3,28,20,.55);border-color:rgba(219,184,107,.25)}
+  .lang button.active{background:rgba(219,184,107,.18);color:#F3EAD3}
 </style>
 </head>
 <body dir="ltr">
@@ -282,6 +308,8 @@
 <main id="main">
   <section class="wrap hero" id="top">
     <div>
+      <p class="bism" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
+      <div class="orn" aria-hidden="true"><i></i><b></b><i></i></div>
       <div class="eyebrow caption-3">
         <svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240 56h-72a40 40 0 0 0-40 40 40 40 0 0 0-40-40H16a8 8 0 0 0-8 8v128a8 8 0 0 0 8 8h72a24 24 0 0 1 24 24 8 8 0 0 0 16 0 24 24 0 0 1 24-24h88a8 8 0 0 0 8-8V64a8 8 0 0 0-8-8ZM88 184H24V72h64a24 24 0 0 1 24 24v96.6A39.8 39.8 0 0 0 88 184Zm144 0h-64a39.8 39.8 0 0 0-24 8.6V96a24 24 0 0 1 24-24h64Z"/></svg>
         <span data-en="Madinah Mushaf · Hafs" data-fr="Mushaf de Médine · Hafs" data-ar="مصحف المدينة · رواية حفص">Madinah Mushaf · Hafs</span>
