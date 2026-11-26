@@ -49,20 +49,30 @@ shot() {  # shot <name> <screen> <page> <lang>
   printf 'MUSHAF_SHOT=%s\nMUSHAF_PAGE=%s\nMUSHAF_LANG=%s\n' "$2" "$3" "$4" > "$data/Documents/screenshot.txt"
   xcrun simctl launch "$UDID" $ID >/dev/null || return
   sleep 35
-  xcrun simctl io "$UDID" screenshot "$OUT/$1.png" >/dev/null 2>&1 && echo "$1.png"
-  local i=0
-  for d in "${DISPLAYS[@]}"; do
-    i=$((i + 1))
-    xcrun simctl io "$UDID" screenshot --display="$d" "$OUT/$1-display$i.png" >/dev/null 2>&1 && echo "$1-display$i.png"
-  done
+  local d=1; [[ "$1" == *-inner-* ]] && d=3
+  xcrun simctl io "$UDID" screenshot --display=$d "$OUT/$1.png" && echo "$1.png"
 }
 
-for lang in ${=LANGS}; do
-  shot "$lang-1-reader" reader 2 $lang
-  shot "$lang-2-recite" recite 50 $lang
-  shot "$lang-3-text" text 1 $lang
-  shot "$lang-4-panel" panel 2 $lang
-  shot "$lang-5-opening" dedication 1 $lang
+# Folded: the outer screen (display 1). Unfolded: power the inner screen (display 3) on and the outer one off.
+fold() {  # fold <outer|inner>
+  if [ "$1" = inner ]; then
+    xcrun simctl io "$UDID" screenConfig --display=3 power on
+    xcrun simctl io "$UDID" screenConfig --display=1 power off
+  else
+    xcrun simctl io "$UDID" screenConfig --display=1 power on
+    xcrun simctl io "$UDID" screenConfig --display=3 power off
+  fi
+  sleep 10
+}
+for posture in outer inner; do
+  echo "== $posture"; fold $posture
+  for lang in ${=LANGS}; do
+    shot "$lang-$posture-1-reader" reader 2 $lang
+    shot "$lang-$posture-2-recite" recite 50 $lang
+    shot "$lang-$posture-3-text" text 1 $lang
+    shot "$lang-$posture-4-panel" panel 2 $lang
+    shot "$lang-$posture-5-opening" dedication 1 $lang
+  done
 done
 xcrun simctl terminate "$UDID" $ID 2>/dev/null
 echo "== Sizes"
