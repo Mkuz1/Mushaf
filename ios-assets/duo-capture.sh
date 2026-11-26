@@ -8,10 +8,16 @@ APP="$1"; OUT="$2"; LANGS="${3:-en fr ar}"
 ID=com.kousa.mushaf
 mkdir -p "$OUT"
 TYPE=$(xcrun simctl list devicetypes | grep -i "duo" | grep -oE 'com\.apple\.CoreSimulator\.SimDeviceType\.[A-Za-z0-9.-]+' | tail -1)
-RUNTIME=$(xcrun simctl list runtimes available | grep -oE 'com\.apple\.CoreSimulator\.SimRuntime\.iOS-[0-9-]+' | tail -1)
-echo "Device type: ${TYPE:-none}, runtime: ${RUNTIME:-none}"
-if [ -z "$TYPE" ] || [ -z "$RUNTIME" ]; then xcrun simctl list devicetypes; xcrun simctl list runtimes; exit 1; fi
-UDID=$(xcrun simctl create "iPhone Duo" "$TYPE" "$RUNTIME") || exit 1
+echo "Device type: ${TYPE:-none}"
+[ -n "$TYPE" ] || { xcrun simctl list devicetypes; exit 1; }
+# The newest iOS runtime that accepts the iPhone Duo (not every installed one does).
+UDID=""
+for RUNTIME in $(xcrun simctl list runtimes available | grep -oE 'com\.apple\.CoreSimulator\.SimRuntime\.iOS-[0-9-]+' | sort -t- -k2,2n -k3,3n | tail -r); do
+  UDID=$(xcrun simctl create "iPhone Duo" "$TYPE" "$RUNTIME" 2>/dev/null) && { echo "Runtime: $RUNTIME"; break; }
+done
+if [ -z "$UDID" ]; then
+  echo "No installed iOS runtime accepts $TYPE"; xcrun simctl list runtimes; exit 1
+fi
 xcrun simctl boot "$UDID" || exit 1
 xcrun simctl bootstatus "$UDID" -b || exit 1
 open -a Simulator --args -CurrentDeviceUDID "$UDID" 2>/dev/null
