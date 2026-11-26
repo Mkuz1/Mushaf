@@ -47,7 +47,7 @@ echo "Display ids: ${DISPLAYS[*]:-none}"
 shot() {  # shot <name> <screen> <page> <lang>
   limit 30 xcrun simctl terminate "$UDID" $ID 2>/dev/null
   # The screenshot hook reads this file (lib/debug/screenshot_hook.dart).
-  local data; data=$(xcrun simctl get_app_container "$UDID" $ID data)
+  local data; data=$(limit 30 xcrun simctl get_app_container "$UDID" $ID data) || return
   mkdir -p "$data/Documents"
   printf 'MUSHAF_SHOT=%s\nMUSHAF_PAGE=%s\nMUSHAF_LANG=%s\n' "$2" "$3" "$4" > "$data/Documents/screenshot.txt"
   limit 60 xcrun simctl launch "$UDID" $ID >/dev/null || return
@@ -56,19 +56,35 @@ shot() {  # shot <name> <screen> <page> <lang>
   limit 60 xcrun simctl io "$UDID" screenshot --display=$d "$OUT/$1.png"; echo "$1.png: $?"
 }
 
-# Folded: the outer screen (display 1). Unfolded: power the inner screen (display 3) on and the outer one off.
-fold() {  # fold <outer|inner>
-  if [ "$1" = inner ]; then
-    limit 30 xcrun simctl io "$UDID" screenConfig --display=3 power on; echo "inner on: $?"
-    limit 30 xcrun simctl io "$UDID" screenConfig --display=1 power off; echo "outer off: $?"
-  else
-    limit 30 xcrun simctl io "$UDID" screenConfig --display=1 power on; echo "outer on: $?"
-    limit 30 xcrun simctl io "$UDID" screenConfig --display=3 power off; echo "inner off: $?"
-  fi
-  sleep 10
+# Folded: the outer screen (display 1). Unfolded: the Simulator app's own fold control, found in its menus (powering
+# the screens on and off with simctl crashes the home screen).
+menus() {
+  limit 30 osascript -e 'tell application "System Events" to tell process "Simulator"
+    set out to ""
+    repeat with m in menu bar items of menu bar 1
+      set out to out & "# " & (name of m) & linefeed
+      try
+        repeat with i in menu items of menu 1 of m
+          set out to out & "  " & (name of i) & linefeed
+        end repeat
+      end try
+    end repeat
+    return out
+  end tell'
 }
+fold() {  # fold <outer|inner>: clicks the first menu item that names unfolding (inner) or folding (outer)
+  local want='Unfold'; [ "$1" = outer ] && want='Fold'
+  local line; line=$(menus | awk -v re="^  .*$want" '/^# /{m=substr($0,3)} $0 ~ re {sub(/^  /,""); print m "\t" $0; exit}')
+  echo "fold $1: ${line:-no menu item}"
+  [ -n "$line" ] || return 1
+  local menu="${line%%$'\t'*}" item="${line#*$'\t'}"
+  limit 30 osascript -e "tell application \"System Events\" to tell process \"Simulator\" to click menu item \"$item\" of menu 1 of menu bar item \"$menu\" of menu bar 1"
+  echo "clicked: $?"; sleep 10
+  limit 60 xcrun simctl io "$UDID" enumerate | grep -iE 'power|Pixel Size' | head -20
+}
+echo "== Simulator menus"; menus | tee "$OUT/menus.txt"
 for posture in outer inner; do
-  echo "== $posture"; fold $posture
+  echo "== $posture"; [ "$posture" = inner ] && { fold inner || break; }
   for lang in ${=LANGS}; do
     shot "$lang-$posture-1-reader" reader 2 $lang
     shot "$lang-$posture-2-recite" recite 50 $lang
