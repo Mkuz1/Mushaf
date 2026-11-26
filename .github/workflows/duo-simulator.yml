@@ -1,0 +1,56 @@
+# Runs the iPhone and iPad app in Xcode 27.1's iPhone Duo simulator: a launch test on the device Apple asks apps
+# to be tested on, and screenshots of every display (ios-assets/duo-capture.sh), pushed to the duo-screenshots
+# branch and kept as the run's artifact.
+name: iPhone Duo simulator
+
+on:
+  workflow_dispatch:
+    inputs:
+      languages:
+        description: Interface languages to capture
+        default: en fr ar
+
+env:
+  FLUTTER_VERSION: 3.47.7
+
+jobs:
+  duo:
+    runs-on: xcode-27
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode 27.1
+        run: |
+          x=$(ls -d /Applications/Xcode_27.1*.app 2>/dev/null | sort -V | tail -1)
+          [ -n "$x" ] || x=$(ls -d /Applications/Xcode_27*.app | sort -V | tail -1)
+          sudo xcode-select -s "$x"
+          xcodebuild -version
+          xcrun simctl list runtimes | grep -q "iOS 27" || xcodebuild -downloadPlatform iOS
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Simulator build
+        working-directory: flutter_app
+        run: |
+          flutter pub get
+          flutter build ios --simulator --debug --dart-define=APPSTORE=true
+      - name: Run in the iPhone Duo simulator
+        run: ios-assets/duo-capture.sh flutter_app/build/ios/iphonesimulator/Runner.app "$RUNNER_TEMP/duo" "${{ inputs.languages }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iphone-duo
+          path: ${{ runner.temp }}/duo/
+      - name: Push to the duo-screenshots branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b duo-screenshots
+          mkdir -p ios-assets/duo-simulator
+          cp "$RUNNER_TEMP"/duo/* ios-assets/duo-simulator/
+          git add ios-assets/duo-simulator
+          git commit -m "iPhone Duo simulator screenshots"
+          git push -f origin duo-screenshots

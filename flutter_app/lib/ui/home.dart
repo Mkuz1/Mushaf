@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../app_model.dart';
 import '../core/l10n.dart';
 import '../core/quran.dart';
+import '../debug/screenshot_hook.dart';
 import 'ayah_menu.dart';
 import 'common.dart';
 import 'dedication.dart';
@@ -49,6 +50,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     model.bootstrap();
+    applyScreenshotHook();
     model.reminder.init(onOpen: model.openKahf).then((opened) {
       if (opened) model.openKahf();
     });
