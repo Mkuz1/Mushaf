@@ -25,9 +25,10 @@ sleep 25
 
 echo "== Displays (simctl io enumerate)"
 xcrun simctl io "$UDID" enumerate 2>&1 | tee "$OUT/displays.txt"
-echo "== simctl commands about folding"
-xcrun simctl help 2>&1 | grep -iE "fold|posture|hinge|display|pose" || echo "(none listed)"
-xcrun simctl help io 2>&1 | grep -iE "fold|posture|hinge|display|pose" || true
+echo "== simctl io help"
+xcrun simctl help io 2>&1 | tee "$OUT/io-help.txt"
+echo "== screenConfig"
+for a in "" help list --help; do echo "--- screenConfig $a"; xcrun simctl io "$UDID" screenConfig $a 2>&1 | head -60; done | tee "$OUT/screenconfig.txt"
 echo "== Device type profile"
 BUNDLE=$(xcrun simctl list devicetypes -j | python3 -c "
 import json, sys
@@ -36,13 +37,17 @@ print(next((t['bundlePath'] for t in d if t['identifier'] == sys.argv[1]), ''))"
 plutil -p "$BUNDLE/Contents/Resources/profile.plist" 2>&1 | head -150 | tee "$OUT/profile.txt"
 
 xcrun simctl install "$UDID" "$APP" || exit 1
-DISPLAYS=($(grep -oE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}' "$OUT/displays.txt" | sort -u))
+# The phone's own screens (display class 0): the inner and the outer one, not the external-display ports.
+DISPLAYS=($(awk '/UUID:/{u=$2} /Display class: 0/{print u}' "$OUT/displays.txt" | sort -u))
 echo "Display ids: ${DISPLAYS[*]:-none}"
 
 shot() {  # shot <name> <screen> <page> <lang>
   xcrun simctl terminate "$UDID" $ID 2>/dev/null
-  SIMCTL_CHILD_MUSHAF_SHOT=$2 SIMCTL_CHILD_MUSHAF_PAGE=$3 SIMCTL_CHILD_MUSHAF_LANG=$4 \
-    xcrun simctl launch "$UDID" $ID >/dev/null || return
+  # The screenshot hook reads this file (lib/debug/screenshot_hook.dart).
+  local data; data=$(xcrun simctl get_app_container "$UDID" $ID data)
+  mkdir -p "$data/Documents"
+  printf 'MUSHAF_SHOT=%s\nMUSHAF_PAGE=%s\nMUSHAF_LANG=%s\n' "$2" "$3" "$4" > "$data/Documents/screenshot.txt"
+  xcrun simctl launch "$UDID" $ID >/dev/null || return
   sleep 35
   xcrun simctl io "$UDID" screenshot "$OUT/$1.png" >/dev/null 2>&1 && echo "$1.png"
   local i=0
