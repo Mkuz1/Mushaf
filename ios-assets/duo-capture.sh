@@ -6,7 +6,10 @@
 set -uo pipefail
 APP="$1"; OUT="$2"; LANGS="${3:-en fr ar}"
 ID=com.kousa.mushaf
+# Runs a command for at most $1 seconds (a hung simctl call must not stall the whole job).
+limit() { local t=$1; shift; perl -e 'alarm shift; exec @ARGV' "$t" "$@"; }
 mkdir -p "$OUT"
+exec > >(tee -a "$OUT/log.txt") 2>&1
 TYPE=$(xcrun simctl list devicetypes | grep -i "duo" | grep -oE 'com\.apple\.CoreSimulator\.SimDeviceType\.[A-Za-z0-9.-]+' | tail -1)
 echo "Device type: ${TYPE:-none}"
 [ -n "$TYPE" ] || { xcrun simctl list devicetypes; exit 1; }
@@ -42,25 +45,25 @@ DISPLAYS=($(awk '/UUID:/{u=$2} /Display class: 0/{print u}' "$OUT/displays.txt" 
 echo "Display ids: ${DISPLAYS[*]:-none}"
 
 shot() {  # shot <name> <screen> <page> <lang>
-  xcrun simctl terminate "$UDID" $ID 2>/dev/null
+  limit 30 xcrun simctl terminate "$UDID" $ID 2>/dev/null
   # The screenshot hook reads this file (lib/debug/screenshot_hook.dart).
   local data; data=$(xcrun simctl get_app_container "$UDID" $ID data)
   mkdir -p "$data/Documents"
   printf 'MUSHAF_SHOT=%s\nMUSHAF_PAGE=%s\nMUSHAF_LANG=%s\n' "$2" "$3" "$4" > "$data/Documents/screenshot.txt"
-  xcrun simctl launch "$UDID" $ID >/dev/null || return
+  limit 60 xcrun simctl launch "$UDID" $ID >/dev/null || return
   sleep 35
   local d=1; [[ "$1" == *-inner-* ]] && d=3
-  xcrun simctl io "$UDID" screenshot --display=$d "$OUT/$1.png" && echo "$1.png"
+  limit 60 xcrun simctl io "$UDID" screenshot --display=$d "$OUT/$1.png"; echo "$1.png: $?"
 }
 
 # Folded: the outer screen (display 1). Unfolded: power the inner screen (display 3) on and the outer one off.
 fold() {  # fold <outer|inner>
   if [ "$1" = inner ]; then
-    xcrun simctl io "$UDID" screenConfig --display=3 power on
-    xcrun simctl io "$UDID" screenConfig --display=1 power off
+    limit 30 xcrun simctl io "$UDID" screenConfig --display=3 power on; echo "inner on: $?"
+    limit 30 xcrun simctl io "$UDID" screenConfig --display=1 power off; echo "outer off: $?"
   else
-    xcrun simctl io "$UDID" screenConfig --display=1 power on
-    xcrun simctl io "$UDID" screenConfig --display=3 power off
+    limit 30 xcrun simctl io "$UDID" screenConfig --display=1 power on; echo "outer on: $?"
+    limit 30 xcrun simctl io "$UDID" screenConfig --display=3 power off; echo "inner off: $?"
   fi
   sleep 10
 }

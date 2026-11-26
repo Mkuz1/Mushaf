@@ -38,6 +38,7 @@ jobs:
           flutter pub get
           flutter build ios --simulator --debug --dart-define=APPSTORE=true
       - name: Run in the iPhone Duo simulator
+        timeout-minutes: 45
         run: |
           app=flutter_app/build/ios/iphonesimulator/Runner.app
           # If no installed iOS runtime takes the iPhone Duo, fetch the one that comes with this Xcode and retry.
@@ -52,6 +53,7 @@ jobs:
           name: iphone-duo
           path: ${{ runner.temp }}/duo/
       - name: Push to the duo-screenshots branch
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
