@@ -38,7 +38,14 @@ jobs:
           flutter pub get
           flutter build ios --simulator --debug --dart-define=APPSTORE=true
       - name: Run in the iPhone Duo simulator
-        run: ios-assets/duo-capture.sh flutter_app/build/ios/iphonesimulator/Runner.app "$RUNNER_TEMP/duo" "${{ inputs.languages }}"
+        run: |
+          app=flutter_app/build/ios/iphonesimulator/Runner.app
+          # If no installed iOS runtime takes the iPhone Duo, fetch the one that comes with this Xcode and retry.
+          ios-assets/duo-capture.sh "$app" "$RUNNER_TEMP/duo" "${{ inputs.languages }}" || {
+            xcodebuild -downloadPlatform iOS
+            rm -rf "$RUNNER_TEMP/duo"
+            ios-assets/duo-capture.sh "$app" "$RUNNER_TEMP/duo" "${{ inputs.languages }}"
+          }
       - uses: actions/upload-artifact@v4
         if: always()
         with:
