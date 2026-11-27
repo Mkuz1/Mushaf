@@ -17,6 +17,7 @@ _Source of truth for this app's claude.ai chat. As of 2026-11-27._
 
 ## Recent changes
 
+- 2026-11-27: **Website security headers** (MK Apps security review): CSP, HSTS, X-Frame-Options DENY, nosniff, Referrer-Policy and Permissions-Policy for every page, in `website/_headers`. The CSP lists exactly the hosts the site uses (Google Fonts, GitHub API, Cloudflare Web Analytics); if you add a new script, font, embed or API host, add it to the CSP or it will be blocked.
 - 2026-11-26: Website shows the live Apple TV App Store listing (PR #41); iPhone/iPad/Mac rows changed from App Store badges to direct downloads; koussa.net invite (PR #40); SEO/share previews, small icons instead of the 377 KB favicon (PR #42).
 - 2026-11-26: Redesigned landing page (English default, emerald/gold dedication style); iPhone Duo simulator screenshot tooling.
 
